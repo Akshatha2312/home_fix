@@ -1,0 +1,159 @@
+import jwt from "jsonwebtoken";
+import Customer from "../models/customer.model.js";
+import Provider from "../models/provider.model.js";
+import Admin from "../models/admin.model.js";
+
+// Protect routes - verify JWT token
+export const protect = async (req, res, next) => {
+  try {
+    let token;
+
+    // Check for token in cookies first, then Authorization header
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authorized, no token" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Try finding user in Customer collection
+    let user = await Customer.findById(decoded.id);
+
+    // If not found, check Provider collection
+    if (!user) {
+      user = await Provider.findById(decoded.id);
+    }
+
+    // If not found, check Admin collection
+    if (!user) {
+      user = await Admin.findById(decoded.id);
+    }
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    }
+
+    req.user = user;
+
+    // Check if user is logged in and session matches
+    if (
+      !req.user.isLoggedIn ||
+      (req.user.activeSessionId &&
+        decoded.sessionId &&
+        req.user.activeSessionId !== decoded.sessionId)
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Session expired or logged in from another device.",
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error(error);
+    if (error.name === "TokenExpiredError") {
+      // Decode the token without verification to get the user ID
+      const decoded = jwt.decode(req.headers.authorization?.split(" ")[1]);
+      if (decoded && decoded.id) {
+        try {
+          // Update user status to logged out
+          let user = await Customer.findByIdAndUpdate(decoded.id, {
+            isLoggedIn: false,
+            socketId: null,
+            activeSessionId: null,
+          });
+
+          if (!user) {
+            await Provider.findByIdAndUpdate(decoded.id, {
+              isLoggedIn: false,
+              socketId: null,
+              activeSessionId: null,
+            });
+          }
+        } catch (dbError) {
+          console.error("Error updating user status on token expiry:", dbError);
+        }
+      }
+      return res
+        .status(401)
+        .json({ success: false, message: "Token expired, please login again" });
+    }
+    return res.status(401).json({ success: false, message: "Not authorized" });
+  }
+};
+
+// Authorize specific roles
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.userType)) {
+      return res.status(403).json({
+        success: false,
+        message: `User role '${req.user.userType}' is not authorized to access this route`,
+      });
+    }
+    next();
+  };
+};
+
+// Optional user restoration - for public routes that can benefit from user context
+export const restoreUser = async (req, res, next) => {
+  try {
+    let token;
+
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    } else if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Try finding user in Customer collection
+    let user = await Customer.findById(decoded.id);
+
+    // If not found, check Provider collection
+    if (!user) {
+      user = await Provider.findById(decoded.id);
+    }
+
+    // If not found, check Admin collection
+    if (!user) {
+      user = await Admin.findById(decoded.id);
+    }
+
+    if (user && user.isLoggedIn) {
+      // Validate session if needed
+      if (
+        !user.activeSessionId ||
+        !decoded.sessionId ||
+        user.activeSessionId === decoded.sessionId
+      ) {
+        req.user = user;
+      }
+    }
+
+    next();
+  } catch (error) {
+    // If token is invalid, just proceed without req.user
+    next();
+  }
+};
