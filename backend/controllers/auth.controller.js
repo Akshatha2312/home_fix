@@ -155,8 +155,13 @@ export const resetPassword = async (req, res) => {
 
 // Generate JWT token
 const generateToken = (user, sessionId) => {
+  const role =
+    user.userType ||
+    (user.constructor?.modelName
+      ? user.constructor.modelName.toLowerCase()
+      : "customer");
   return jwt.sign(
-    { id: user._id, role: user.userType, sessionId },
+    { id: user._id, role, sessionId },
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRE || "7d",

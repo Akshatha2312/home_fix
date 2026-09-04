@@ -21,8 +21,8 @@ router.get("/", getServiceTypes);
 router.get("/search", searchProviders);
 router.get("/:type", restoreUser, getProvidersByType);
 
-// Protected routes (Customer only) for viewing provider details
-router.get("/provider/:id", protect, authorize("customer"), getProviderDetails);
+// Public route for viewing provider details
+router.get("/provider/:id", restoreUser, getProviderDetails);
 
 // Protected route (Provider only) for updating profile
 router.put("/profile", protect, authorize("provider"), updateProfile);

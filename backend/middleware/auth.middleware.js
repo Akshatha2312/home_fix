@@ -26,17 +26,19 @@ export const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Try finding user in Customer collection
+    let inferredRole = "customer";
     let user = await Customer.findById(decoded.id);
 
     // If not found, check Provider collection
     if (!user) {
       user = await Provider.findById(decoded.id);
+      inferredRole = "provider";
     }
 
     // If not found, check Admin collection
     if (!user) {
       user = await Admin.findById(decoded.id);
+      inferredRole = "admin";
     }
 
     if (!user) {
@@ -46,6 +48,9 @@ export const protect = async (req, res, next) => {
     }
 
     req.user = user;
+    if (!req.user.userType) {
+      req.user.userType = inferredRole;
+    }
 
     // Check if user is logged in and session matches
     if (
@@ -97,10 +102,14 @@ export const protect = async (req, res, next) => {
 // Authorize specific roles
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.userType)) {
+    const userRole = req.user?.userType || req.user?.role;
+    if (!roles.includes(userRole)) {
+      console.warn(
+        `[AUTH 403] Route '${req.originalUrl}' requested. User ID: ${req.user?._id}, Role: '${userRole}', Required: [${roles.join(", ")}]`
+      );
       return res.status(403).json({
         success: false,
-        message: `User role '${req.user.userType}' is not authorized to access this route`,
+        message: `User role '${userRole}' is not authorized to access this route`,
       });
     }
     next();
@@ -127,20 +136,25 @@ export const restoreUser = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Try finding user in Customer collection
+    let inferredRole = "customer";
     let user = await Customer.findById(decoded.id);
 
     // If not found, check Provider collection
     if (!user) {
       user = await Provider.findById(decoded.id);
+      inferredRole = "provider";
     }
 
     // If not found, check Admin collection
     if (!user) {
       user = await Admin.findById(decoded.id);
+      inferredRole = "admin";
     }
 
     if (user && user.isLoggedIn) {
+      if (!user.userType) {
+        user.userType = inferredRole;
+      }
       // Validate session if needed
       if (
         !user.activeSessionId ||
