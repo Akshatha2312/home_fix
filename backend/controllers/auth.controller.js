@@ -281,7 +281,7 @@ export const register = async (req, res) => {
 // @route   POST /api/auth/login
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, userType } = req.body;
 
     if (!email || !password) {
       return res
@@ -289,17 +289,19 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Please provide email and password" });
     }
 
-    // Check Customer collection first
-    let user = await Customer.findOne({ email }).select("+password");
-
-    // If not found, check Provider collection
-    if (!user) {
+    let user;
+    if (userType === "provider") {
       user = await Provider.findOne({ email }).select("+password");
-    }
-
-    // If not found, check Admin collection
-    if (!user) {
+      if (!user) user = await Customer.findOne({ email }).select("+password");
+      if (!user) user = await Admin.findOne({ email }).select("+password");
+    } else if (userType === "admin") {
       user = await Admin.findOne({ email }).select("+password");
+      if (!user) user = await Customer.findOne({ email }).select("+password");
+      if (!user) user = await Provider.findOne({ email }).select("+password");
+    } else {
+      user = await Customer.findOne({ email }).select("+password");
+      if (!user) user = await Provider.findOne({ email }).select("+password");
+      if (!user) user = await Admin.findOne({ email }).select("+password");
     }
 
     if (!user) {

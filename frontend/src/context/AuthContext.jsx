@@ -40,9 +40,9 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [checkAuth]);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, userType) => {
     try {
-      const res = await authAPI.login({ email, password });
+      const res = await authAPI.login({ email, password, userType });
       setUser(res.user);
       setToken(res.token);
       setIsAuthenticated(true);

@@ -26,19 +26,43 @@ export const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    let inferredRole = "customer";
-    let user = await Customer.findById(decoded.id);
+    let user;
+    let inferredRole = decoded.role || "customer";
 
-    // If not found, check Provider collection
-    if (!user) {
+    // Prioritize collection lookup based on JWT role claim
+    if (decoded.role === "provider") {
       user = await Provider.findById(decoded.id);
       inferredRole = "provider";
-    }
-
-    // If not found, check Admin collection
-    if (!user) {
+      if (!user) {
+        user = await Customer.findById(decoded.id);
+        if (user) inferredRole = "customer";
+      }
+      if (!user) {
+        user = await Admin.findById(decoded.id);
+        if (user) inferredRole = "admin";
+      }
+    } else if (decoded.role === "admin") {
       user = await Admin.findById(decoded.id);
       inferredRole = "admin";
+      if (!user) {
+        user = await Customer.findById(decoded.id);
+        if (user) inferredRole = "customer";
+      }
+      if (!user) {
+        user = await Provider.findById(decoded.id);
+        if (user) inferredRole = "provider";
+      }
+    } else {
+      user = await Customer.findById(decoded.id);
+      inferredRole = "customer";
+      if (!user) {
+        user = await Provider.findById(decoded.id);
+        if (user) inferredRole = "provider";
+      }
+      if (!user) {
+        user = await Admin.findById(decoded.id);
+        if (user) inferredRole = "admin";
+      }
     }
 
     if (!user) {
@@ -136,19 +160,42 @@ export const restoreUser = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    let inferredRole = "customer";
-    let user = await Customer.findById(decoded.id);
+    let user;
+    let inferredRole = decoded.role || "customer";
 
-    // If not found, check Provider collection
-    if (!user) {
+    if (decoded.role === "provider") {
       user = await Provider.findById(decoded.id);
       inferredRole = "provider";
-    }
-
-    // If not found, check Admin collection
-    if (!user) {
+      if (!user) {
+        user = await Customer.findById(decoded.id);
+        if (user) inferredRole = "customer";
+      }
+      if (!user) {
+        user = await Admin.findById(decoded.id);
+        if (user) inferredRole = "admin";
+      }
+    } else if (decoded.role === "admin") {
       user = await Admin.findById(decoded.id);
       inferredRole = "admin";
+      if (!user) {
+        user = await Customer.findById(decoded.id);
+        if (user) inferredRole = "customer";
+      }
+      if (!user) {
+        user = await Provider.findById(decoded.id);
+        if (user) inferredRole = "provider";
+      }
+    } else {
+      user = await Customer.findById(decoded.id);
+      inferredRole = "customer";
+      if (!user) {
+        user = await Provider.findById(decoded.id);
+        if (user) inferredRole = "provider";
+      }
+      if (!user) {
+        user = await Admin.findById(decoded.id);
+        if (user) inferredRole = "admin";
+      }
     }
 
     if (user && user.isLoggedIn) {

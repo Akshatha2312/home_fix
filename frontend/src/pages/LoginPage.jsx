@@ -17,7 +17,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const result = await login(email, password);
+    const result = await login(email, password, loginType);
     setLoading(false);
 
     if (result.success) {
