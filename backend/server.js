@@ -32,19 +32,33 @@ const isVercel = process.env.VERCEL === "1";
 
 app.set("trust proxy", 1);
 
-const configuredOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
-  .split(",")
+const configuredOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "https://home-fix.vercel.app",
+  "https://home-drgzjd5t1-portfolios-projects-350917fc.vercel.app",
+  ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : []),
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : []),
+]
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  return configuredOrigins.includes(origin);
+};
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || configuredOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
-    return callback(new Error("Not allowed by CORS"));
+    return callback(null, false);
   },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 };
 
 let httpServer;
