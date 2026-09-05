@@ -37,7 +37,6 @@ const configuredOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:5173",
   "https://home-fix.vercel.app",
-  "https://home-drgzjd5t1-portfolios-projects-350917fc.vercel.app",
   ...(process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : []),
   ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : []),
 ]
@@ -46,7 +45,10 @@ const configuredOrigins = [
 
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
-  return configuredOrigins.includes(origin);
+  if (configuredOrigins.includes(origin)) return true;
+  if (origin === "https://home-fix.vercel.app" || origin.startsWith("https://home-fix-")) return true;
+  if (origin.endsWith("-portfolios-projects-350917fc.vercel.app")) return true;
+  return false;
 };
 
 const corsOptions = {
