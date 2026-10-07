@@ -42,16 +42,16 @@ const FAQSection = () => {
   };
 
   return (
-    <section className="py-16 bg-gray-50 border-t border-gray-100">
+    <section className="py-20 bg-white border-t border-slate-100">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border border-blue-100">
-            <HelpCircle className="w-4 h-4" /> Got Questions?
+          <div className="inline-flex items-center gap-2 bg-teal-50 text-[#0F766E] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border border-teal-100 shadow-2xs">
+            <HelpCircle className="w-4 h-4 text-[#0F766E]" /> Got Questions?
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F2747] tracking-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-gray-600 mt-2 text-base">
+          <p className="text-slate-600 mt-2 text-base max-w-xl mx-auto">
             Everything you need to know about booking and receiving services on HomeFix.
           </p>
         </div>
@@ -62,23 +62,35 @@ const FAQSection = () => {
             return (
               <div
                 key={index}
-                className="bg-white rounded-xl border border-gray-200/80 shadow-2xs overflow-hidden transition-all duration-200"
+                className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                  isOpen
+                    ? "bg-slate-50/80 border-teal-200 shadow-sm"
+                    : "bg-white border-slate-200/80 hover:border-teal-200 shadow-2xs"
+                }`}
               >
                 <button
                   type="button"
                   onClick={() => toggleFAQ(index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-semibold text-gray-900 text-base sm:text-lg hover:bg-gray-50/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full px-6 py-4.5 text-left flex items-center justify-between gap-4 font-semibold text-[#172033] text-base sm:text-lg hover:text-[#0F766E] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20"
                   aria-expanded={isOpen}
                 >
                   <span className="leading-snug">{faq.question}</span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-gray-400 shrink-0 transition-transform duration-200 ${
-                      isOpen ? "transform rotate-180 text-primary" : ""
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                      isOpen
+                        ? "bg-[#0F766E] text-white"
+                        : "bg-slate-100 text-slate-400"
                     }`}
-                  />
+                  >
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        isOpen ? "transform rotate-180" : ""
+                      }`}
+                    />
+                  </div>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-gray-600 text-sm sm:text-base leading-relaxed border-t border-gray-100/60 bg-gray-50/40">
+                  <div className="px-6 pb-5 pt-1 text-slate-600 text-sm sm:text-base leading-relaxed border-t border-slate-100 bg-white/60">
                     {faq.answer}
                   </div>
                 )}

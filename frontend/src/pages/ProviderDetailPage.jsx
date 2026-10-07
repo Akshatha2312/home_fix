@@ -4,11 +4,14 @@ import {
   MapPin,
   Briefcase,
   Star,
-  CheckCircle,
+  CheckCircle2,
   Clock,
   ShieldCheck,
   Zap,
   Navigation,
+  ArrowRight,
+  Sparkles,
+  Award,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { servicesAPI, bookingsAPI } from "../services/api";
@@ -20,6 +23,7 @@ const ProviderDetailPage = () => {
   const { id } = useParams();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
   // Form State
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
@@ -37,6 +41,8 @@ const ProviderDetailPage = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [provider, setProvider] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
 
   // Pre-fill address from user profile if available
   useEffect(() => {
@@ -64,7 +70,6 @@ const ProviderDetailPage = () => {
       async (position) => {
         const { latitude, longitude } = position.coords;
         try {
-          // Reverse geocode using free Nominatim (OpenStreetMap) API
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
           );
@@ -88,7 +93,6 @@ const ProviderDetailPage = () => {
           toast.success("Location captured successfully!");
         } catch (error) {
           console.error("Reverse geocoding failed:", error);
-          // Even if geocoding fails, we still have coordinates
           setAddress((prev) => ({
             ...prev,
             coordinates: { lat: latitude, lng: longitude },
@@ -141,7 +145,23 @@ const ProviderDetailPage = () => {
     fetchAvailability();
   }, [provider, bookingDate]);
 
-  // ... (existing code)
+  // Fetch provider detail & reviews
+  useEffect(() => {
+    const fetchProvider = async () => {
+      try {
+        const response = await servicesAPI.getProvider(id);
+        if (response.success) {
+          setProvider(response.provider);
+          setReviews(response.reviews || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch provider:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProvider();
+  }, [id]);
 
   const handleBooking = async (e) => {
     e.preventDefault();
@@ -169,8 +189,6 @@ const ProviderDetailPage = () => {
         toast.success(
           "Booking request submitted! The provider will confirm shortly.",
         );
-        // Reset form
-        // Reset form
         setBookingDate("");
         setBookingTime("");
         setAddress({
@@ -183,7 +201,6 @@ const ProviderDetailPage = () => {
         });
         setDescription("");
         setDuration(1);
-        // Optional: Redirect to customer dashboard
         navigate("/customer-dashboard");
       }
     } catch (error) {
@@ -193,53 +210,39 @@ const ProviderDetailPage = () => {
       setIsBooking(false);
     }
   };
-  const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState([]);
-
-  useEffect(() => {
-    const fetchProvider = async () => {
-      try {
-        const response = await servicesAPI.getProvider(id);
-        if (response.success) {
-          setProvider(response.provider);
-          setReviews(response.reviews || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch provider:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProvider();
-  }, [id]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-24 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-[#F8FAFC] pt-24 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0F766E] border-t-transparent"></div>
       </div>
     );
   }
 
   if (!provider) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-24 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-[#F8FAFC] pt-24 flex items-center justify-center">
+        <div className="text-center bg-white p-12 rounded-2xl border border-slate-200 shadow-2xs max-w-md">
           <p className="text-5xl mb-4">🔍</p>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
+          <h2 className="text-xl font-bold text-[#0F2747] mb-2">
             Provider Not Found
           </h2>
-          <Link to="/services" className="text-primary hover:underline text-sm">
-            ← Back to Services
+          <p className="text-slate-500 text-sm mb-6">
+            The requested service provider could not be found or is unavailable.
+          </p>
+          <Link
+            to="/services"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F766E] text-white font-bold text-sm rounded-xl"
+          >
+            ← Back to All Services
           </Link>
         </div>
       </div>
     );
   }
 
-  // Reviews are fetched from API
   const formattedReviews = reviews.map((r) => ({
-    name: r.customerId?.name || "Anonymous Customer",
+    name: r.customerId?.name || "Verified Customer",
     initials: r.customerId?.name
       ? r.customerId.name
           .split(" ")
@@ -247,9 +250,15 @@ const ProviderDetailPage = () => {
           .join("")
           .substring(0, 2)
           .toUpperCase()
-      : "AC",
+      : "VC",
     rating: r.rating || 5,
-    date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "Recent",
+    date: r.createdAt
+      ? new Date(r.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "Recent",
     text: r.review || "No detailed review comment provided.",
     serviceType: r.serviceType || provider?.serviceType || "",
   }));
@@ -263,54 +272,53 @@ const ProviderDetailPage = () => {
     carpenter: "Carpentry",
   };
 
-  // Check if provider has custom portfolio images
   const portfolioImages = provider?.portfolio || provider?.workImages || [];
 
   return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen font-sans pb-12">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-3 text-sm text-gray-500 flex items-center gap-2 flex-wrap">
-          <Link to="/" className="hover:text-primary transition-colors">
+    <div className="bg-[#F8FAFC] text-[#172033] min-h-screen font-sans pb-16">
+      {/* Breadcrumb Header */}
+      <div className="bg-white border-b border-slate-200/80">
+        <div className="container mx-auto px-4 py-3 text-xs sm:text-sm text-slate-500 flex items-center gap-2 flex-wrap max-w-7xl font-semibold">
+          <Link to="/" className="hover:text-[#0F766E] transition-colors">
             Home
           </Link>
           <span>/</span>
-          <Link to="/services" className="hover:text-primary transition-colors">
+          <Link to="/services" className="hover:text-[#0F766E] transition-colors">
             Services
           </Link>
           <span>/</span>
-          <span className="text-gray-900 font-medium truncate">
+          <span className="text-[#0F2747] font-bold truncate">
             {provider.name}
           </span>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      {/* Main Content Area */}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Left Column: Profile Info */}
+          {/* Left Column: Provider Detail Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Profile Header Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+            {/* 1. PROVIDER PROFILE HERO */}
+            <div className="bg-white rounded-2xl shadow-2xs border border-slate-200/80 p-6 md:p-8 relative overflow-hidden">
               <div className="flex flex-col sm:flex-row gap-6 items-start">
                 <div className="relative shrink-0">
                   {provider.profileImage ? (
                     <img
                       src={provider.profileImage}
                       alt={provider.name}
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-gray-100"
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-white shadow-md ring-1 ring-slate-100"
                     />
                   ) : (
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-blue-50 text-primary flex items-center justify-center font-bold text-3xl border-2 border-white shadow-sm ring-1 ring-gray-100">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-teal-50 text-[#0F766E] flex items-center justify-center font-black text-3xl border-2 border-white shadow-md ring-1 ring-slate-100">
                       {provider.name.charAt(0)}
                     </div>
                   )}
                   {provider.isVerified && (
                     <span
-                      title="Identity & Background Verified Provider"
-                      className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full shadow-md ring-2 ring-white"
+                      title="Verified Partner"
+                      className="absolute -bottom-2 -right-2 bg-[#0F766E] text-white p-1.5 rounded-full shadow-md ring-2 ring-white"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      <CheckCircle2 className="w-4 h-4" />
                     </span>
                   )}
                 </div>
@@ -319,88 +327,127 @@ const ProviderDetailPage = () => {
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                        <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] leading-tight">
                           {provider.name}
                         </h1>
                         {provider.isVerified && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-[#0F766E] border border-teal-100">
                             <ShieldCheck className="w-3.5 h-3.5" /> Identity Verified
                           </span>
                         )}
                       </div>
-                      <p className="text-base text-primary font-semibold mb-3">
+                      <p className="text-sm sm:text-base text-[#0F766E] font-bold mb-3">
                         {serviceLabels[provider.serviceType] || provider.serviceType} Specialist
                       </p>
                     </div>
 
-                    <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg">
-                      <div className="flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200/60 px-3 py-1 rounded-lg font-bold text-base">
-                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0 bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl">
+                      <div className="flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200/80 px-3 py-1 rounded-xl font-extrabold text-base">
+                        <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
                         <span>{provider.rating ? provider.rating.toFixed(1) : "New"}</span>
                       </div>
-                      <span className="text-xs text-gray-500 font-medium">
-                        {provider.totalReviews || 0} customer reviews
+                      <span className="text-xs text-slate-500 font-semibold">
+                        {provider.totalReviews || 0} reviews
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-100 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs sm:text-sm text-slate-600 font-semibold">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                      <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
                       <span className="truncate">
                         {provider.location?.area || "Bangalore"}, Bengaluru
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
-                      <span>{provider.experience || 0} Years Experience</span>
+                      <Briefcase className="w-4 h-4 text-slate-400 shrink-0" />
+                      <span>{provider.experience || 1} Years Experience</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <span className="text-emerald-700 font-medium">Available for Booking</span>
+                      <Clock className="w-4 h-4 text-[#16A34A] shrink-0" />
+                      <span className="text-[#16A34A] font-bold">Available for Booking</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 border-t border-gray-100 pt-6">
-                <h2 className="text-base font-bold text-gray-900 mb-2">About Provider</h2>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+              {/* 7. ABOUT / PROFESSIONAL INFORMATION */}
+              <div className="mt-6 border-t border-slate-100 pt-6">
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-[#0F2747] mb-2">
+                  About Professional
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
                   {provider.description ||
-                    `Certified ${serviceLabels[provider.serviceType] || provider.serviceType} professional with over ${provider.experience || 0} years of field experience. Dedicated to prompt, high-quality, and reliable service.`}
+                    `Certified ${serviceLabels[provider.serviceType] || provider.serviceType} professional with over ${provider.experience || 1} years of hands-on experience in residential and commercial installations, maintenance, and emergency repairs.`}
                 </p>
+              </div>
+
+              {/* 8. SERVICES / SKILLS TAGS */}
+              <div className="mt-6 border-t border-slate-100 pt-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                  Service Expertise
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-3 py-1 bg-teal-50 text-[#0F766E] text-xs font-bold rounded-lg border border-teal-100">
+                    {serviceLabels[provider.serviceType] || provider.serviceType}
+                  </span>
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">
+                    Emergency Service
+                  </span>
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">
+                    Residential Repair
+                  </span>
+                  <span className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">
+                    On-Time Guarantee
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Work Portfolio Gallery - Only displayed if real portfolio images exist */}
+            {/* 10. PORTFOLIO (Only if real images exist) */}
             {portfolioImages.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">Work Portfolio</h2>
+              <div className="bg-white rounded-2xl shadow-2xs border border-slate-200/80 p-6 md:p-8">
+                <h2 className="text-lg font-extrabold text-[#0F2747] mb-4">
+                  Work Portfolio
+                </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {portfolioImages.map((img, idx) => (
-                    <div key={idx} className="rounded-lg overflow-hidden border border-gray-200 h-32">
-                      <img src={img} alt={`Work sample ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div
+                      key={idx}
+                      className="rounded-xl overflow-hidden border border-slate-200 h-36 group"
+                    >
+                      <img
+                        src={img}
+                        alt={`Work sample ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Customer Reviews Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
-              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-100">
+            {/* 11. REVIEWS SECTION */}
+            <div className="bg-white rounded-2xl shadow-2xs border border-slate-200/80 p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Customer Ratings & Reviews</h2>
-                  <p className="text-xs text-gray-500 mt-0.5">Verified service experiences from HomeFix users</p>
+                  <h2 className="text-xl font-extrabold text-[#0F2747]">
+                    Customer Reviews
+                  </h2>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    Verified feedback from HomeFix service bookings
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1.5 justify-end">
-                    <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                    <span className="text-2xl font-black text-gray-900">
+                    <Star className="w-5 h-5 fill-[#F59E0B] text-[#F59E0B]" />
+                    <span className="text-2xl font-black text-[#0F2747]">
                       {provider.rating ? provider.rating.toFixed(1) : "N/A"}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500">{provider.totalReviews || 0} Total Reviews</span>
+                  <span className="text-xs text-slate-500 font-semibold">
+                    {provider.totalReviews || 0} Total Reviews
+                  </span>
                 </div>
               </div>
 
@@ -410,40 +457,42 @@ const ProviderDetailPage = () => {
                   formattedReviews.map((review, i) => (
                     <div
                       key={i}
-                      className="border-b border-gray-100 pb-6 last:border-0 last:pb-0"
+                      className="border-b border-slate-100 pb-6 last:border-0 last:pb-0"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-100 shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-teal-50 text-[#0F766E] font-bold text-xs flex items-center justify-center border border-teal-100 shrink-0">
                             {review.initials}
                           </div>
                           <div>
-                            <span className="font-semibold text-gray-900 text-sm block leading-tight">
+                            <span className="font-bold text-[#172033] text-sm block leading-tight">
                               {review.name}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-slate-400 font-medium">
                               {review.date}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded text-amber-800 text-xs font-semibold">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <div className="flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg text-amber-900 text-xs font-bold border border-amber-200/60">
+                          <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
                           <span>{review.rating.toFixed(1)}</span>
                         </div>
                       </div>
-                      <p className="text-gray-600 text-sm leading-relaxed mt-2 pl-12">
+                      <p className="text-slate-600 text-sm leading-relaxed mt-2 pl-13 font-medium">
                         {review.text}
                       </p>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-10 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-xs text-gray-400">
+                  <div className="text-center py-10 px-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
                       <Star className="w-6 h-6" />
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 mb-1">No reviews yet</h3>
-                    <p className="text-sm text-gray-500 max-w-sm mx-auto">
-                      Be the first customer to book this provider and share your experience with the community.
+                    <h3 className="text-base font-bold text-[#0F2747] mb-1">
+                      No reviews yet
+                    </h3>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
+                      Be the first customer to book this provider and share your experience.
                     </p>
                   </div>
                 )}
@@ -451,55 +500,59 @@ const ProviderDetailPage = () => {
             </div>
           </div>
 
-          {/* Right Column: Sticky Compact Booking Card */}
+          {/* 3. STICKY BOOKING CARD */}
           <aside className="lg:w-full lg:sticky lg:top-24">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200/80 p-6">
-              <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-gray-100">
+            <div className="bg-white rounded-2xl shadow-xl border border-slate-200/90 p-6 relative overflow-hidden">
+              <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 block">
-                    Service Rate
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Hourly Rate
                   </span>
                   <div className="flex items-baseline gap-1 mt-0.5">
-                    <span className="text-3xl font-extrabold text-gray-900">
+                    <span className="text-3xl font-black text-[#0F2747]">
                       ₹{provider.pricePerHour}
                     </span>
-                    <span className="text-gray-500 text-sm font-medium">/ hr</span>
+                    <span className="text-slate-500 text-xs font-semibold">/ hr</span>
                   </div>
                 </div>
                 {provider.isVerified && (
                   <div className="text-right">
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#0F766E] bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100">
                       <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-2.5 mb-5 text-xs text-gray-600 bg-blue-50/50 p-3 rounded-lg border border-blue-100/60">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Identity & Profile Background Checked</span>
+              {/* Trust Callouts */}
+              <div className="space-y-2 mb-5 text-xs text-slate-600 bg-teal-50/70 p-3.5 rounded-xl border border-teal-100">
+                <div className="flex items-center gap-2 font-semibold text-[#0F766E]">
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span>Verified Identity & Skill Evaluation</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Direct Scheduling & Prompt Confirmation</span>
+                <div className="flex items-center gap-2 font-semibold text-[#0F766E]">
+                  <Zap className="w-4 h-4 shrink-0" />
+                  <span>Direct Booking & Immediate Status Updates</span>
                 </div>
               </div>
 
               {/* Booking Form */}
               <form onSubmit={handleBooking} className="space-y-4">
+                {/* 5. Date Selector */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                    Select Date
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1.5">
+                    Select Service Date
                   </label>
                   <DateSelector
                     selectedDate={bookingDate}
                     onSelect={setBookingDate}
                   />
                 </div>
+
+                {/* 6. Time Selector */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                    Select Time Slot
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1.5">
+                    Select Start Time
                   </label>
                   <TimeSelector
                     selectedTime={bookingTime}
@@ -509,14 +562,16 @@ const ProviderDetailPage = () => {
                     selectedDuration={duration}
                   />
                 </div>
+
+                {/* Duration */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1">
                     Estimated Duration
                   </label>
                   <select
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white font-medium text-gray-800"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-[#172033] focus:ring-2 focus:ring-[#0F766E] focus:border-transparent outline-none bg-slate-50"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
                       <option key={h} value={h}>
@@ -525,20 +580,22 @@ const ProviderDetailPage = () => {
                     ))}
                   </select>
                 </div>
+
+                {/* Service Address */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1">
                     Service Location
                   </label>
                   <div className="space-y-2">
                     <input
                       type="text"
                       required
-                      placeholder="Street / Flat / Door No"
+                      placeholder="Street / Door No / Apartment"
                       value={address.street}
                       onChange={(e) =>
                         setAddress({ ...address, street: e.target.value })
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                      className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none"
                     />
                     <div className="grid grid-cols-2 gap-2">
                       <input
@@ -549,7 +606,7 @@ const ProviderDetailPage = () => {
                         onChange={(e) =>
                           setAddress({ ...address, area: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none"
                       />
                       <input
                         type="text"
@@ -559,7 +616,7 @@ const ProviderDetailPage = () => {
                         onChange={(e) =>
                           setAddress({ ...address, city: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -571,28 +628,28 @@ const ProviderDetailPage = () => {
                         onChange={(e) =>
                           setAddress({ ...address, pincode: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none"
                       />
                       <input
                         type="text"
-                        placeholder="Landmark (Opt)"
+                        placeholder="Landmark (Optional)"
                         value={address.landmark}
                         onChange={(e) =>
                           setAddress({ ...address, landmark: e.target.value })
                         }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none"
                       />
                     </div>
 
-                    {/* Use My Location Button */}
+                    {/* GPS Location Button */}
                     <button
                       type="button"
                       onClick={getMyLocation}
                       disabled={locationLoading}
-                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed rounded-lg text-xs font-semibold transition-all ${
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         address.coordinates?.lat
-                          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                          : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          ? "border-emerald-300 bg-emerald-50 text-[#16A34A]"
+                          : "border-teal-300 bg-teal-50 text-[#0F766E] hover:bg-teal-100"
                       } ${locationLoading ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       {locationLoading ? (
@@ -603,38 +660,50 @@ const ProviderDetailPage = () => {
                       {locationLoading
                         ? "Getting location..."
                         : address.coordinates?.lat
-                          ? "📍 Location Captured"
+                          ? "📍 GPS Location Captured"
                           : "📍 Use Current GPS Location"}
                     </button>
                   </div>
                 </div>
 
+                {/* Problem Description */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                    Problem Notes (Optional)
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1">
+                    Job Description (Optional)
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="Briefly describe the task or issue..."
+                    placeholder="Describe the task or issue briefly..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none resize-none"
+                    className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-[#0F766E] outline-none resize-none"
                   />
+                </div>
+
+                {/* 4. BOOKING SUMMARY & CTA */}
+                <div className="pt-3 border-t border-slate-100 space-y-2 text-xs font-semibold text-slate-600">
+                  <div className="flex justify-between">
+                    <span>Estimated Total:</span>
+                    <span className="font-extrabold text-[#0F2747] text-sm">
+                      ₹{provider.pricePerHour * duration}
+                    </span>
+                  </div>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isBooking}
-                  className={`block w-full bg-primary hover:bg-blue-700 text-white text-center font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg active:scale-98 ${
+                  className={`w-full bg-[#0F766E] hover:bg-[#0B5F59] text-white font-bold py-3.5 px-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer ${
                     isBooking ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
-                  {isBooking ? "Submitting Booking..." : `Confirm Booking (₹${provider.pricePerHour * duration})`}
+                  <span>{isBooking ? "Submitting Request..." : `Confirm Booking (₹${provider.pricePerHour * duration})`}</span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
 
-              <p className="text-[11px] text-center text-gray-500 mt-3 leading-tight">
-                No upfront payment required. You pay after service completion.
+              <p className="text-[11px] text-center text-slate-400 mt-3 font-semibold">
+                No upfront charge. Pay after service completion.
               </p>
             </div>
           </aside>

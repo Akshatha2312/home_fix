@@ -52,22 +52,22 @@ const DateSelector = ({ selectedDate, onSelect }) => {
               onClick={() => onSelect(item.fullDate)}
               className={`flex-shrink-0 w-20 h-24 rounded-lg flex flex-col items-center justify-center transition-all snap-start border ${
                 isSelected
-                  ? "bg-blue-500 text-white border-blue-500 shadow-lg scale-105"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                  ? "bg-[#0F766E] text-white border-[#0F766E] shadow-md scale-105"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-teal-300 hover:bg-teal-50"
               }`}
             >
               <span
-                className={`text-xs font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}
+                className={`text-xs font-semibold ${isSelected ? "text-teal-100" : "text-slate-400"}`}
               >
                 {item.day}
               </span>
               <span
-                className={`text-2xl font-bold my-1 ${isSelected ? "text-white" : "text-gray-700"}`}
+                className={`text-2xl font-bold my-1 ${isSelected ? "text-white" : "text-slate-700"}`}
               >
                 {item.dateNum}
               </span>
               <span
-                className={`text-xs font-semibold ${isSelected ? "text-blue-100" : "text-gray-400"}`}
+                className={`text-xs font-semibold ${isSelected ? "text-teal-100" : "text-slate-400"}`}
               >
                 {item.month}
               </span>

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { MapPin, Briefcase, Star, Heart, CheckCircle } from "lucide-react";
+import { MapPin, Briefcase, Star, Heart, CheckCircle2, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { favoritesAPI } from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -84,91 +84,99 @@ const ProviderCard = ({ provider }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-blue-100 transition-all duration-300 group relative flex flex-col h-full">
-      <button
-        onClick={toggleFavorite}
-        className="absolute top-4 right-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-red-50 hover:text-red-500 transition-all border border-gray-100"
-      >
-        <Heart
-          className={`w-5 h-5 transition-colors ${
-            isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-          }`}
-        />
-      </button>
-
-      <div className="p-5 flex flex-col grow">
-        <div className="flex items-start gap-4 mb-4">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center shrink-0 overflow-hidden text-primary border-2 border-white shadow-sm ring-1 ring-gray-100">
-              {provider.profileImage ? (
-                <img
-                  src={provider.profileImage}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-2xl font-bold">{name.charAt(0)}</span>
-              )}
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-xl hover:border-teal-200 transition-all duration-300 group relative flex flex-col h-full overflow-hidden">
+      {/* Top Banner / Favorite button */}
+      <div className="p-5 pb-4 flex flex-col grow">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3.5">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center shrink-0 overflow-hidden text-[#0F766E] border border-teal-100 shadow-2xs">
+                {provider.profileImage ? (
+                  <img
+                    src={provider.profileImage}
+                    alt={name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <span className="text-2xl font-black">{name.charAt(0)}</span>
+                )}
+              </div>
+              {/* Online Status Indicator */}
+              <div
+                className={`absolute -bottom-1 -right-1 w-4 h-4 border-2 border-white rounded-full ${
+                  isOnline ? "bg-[#16A34A]" : "bg-[#DC2626]"
+                }`}
+                title={isOnline ? "Online Now" : "Offline"}
+              ></div>
             </div>
-            {/* Online Status Indicator */}
-            <div
-              className={`absolute bottom-0 right-0 w-4 h-4 border-2 border-white rounded-full ${
-                isOnline ? "bg-green-500" : "bg-red-500"
-              }`}
-            ></div>
-          </div>
 
-          <div className="flex-1 min-w-0 pt-1">
-            <h3 className="font-bold text-gray-900 text-lg leading-tight truncate flex items-center gap-1.5">
-              {name}
+            <div className="min-w-0">
+              <h3 className="font-extrabold text-[#0F2747] text-lg leading-tight truncate flex items-center gap-1.5 group-hover:text-[#0F766E] transition-colors">
+                {name}
+              </h3>
+              <p className="text-xs text-[#0F766E] font-bold uppercase tracking-wider mt-0.5">
+                {serviceLabels[provider.serviceType] || provider.serviceType}
+              </p>
               {provider.isVerified && (
-                <CheckCircle className="w-4 h-4 text-blue-500 fill-blue-50" />
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0F766E] bg-teal-50 px-2 py-0.5 rounded-full border border-teal-100 mt-1">
+                  <CheckCircle2 className="w-3 h-3 text-[#0F766E]" /> Verified
+                </span>
               )}
-            </h3>
-            <p className="text-sm text-primary font-medium mt-1">
-              {serviceLabels[provider.serviceType] || provider.serviceType}
-            </p>
-            <div className="flex items-center gap-1 mt-1.5">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-bold text-gray-900 text-sm">
-                {provider.rating?.toFixed(1) || "New"}
-              </span>
-              <span className="text-gray-400 text-xs">
-                ({provider.totalReviews || 0} reviews)
-              </span>
             </div>
           </div>
+
+          <button
+            onClick={toggleFavorite}
+            type="button"
+            className="p-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-xl transition-colors border border-slate-100 shrink-0 cursor-pointer"
+            aria-label="Toggle Favorite"
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                isFavorite ? "fill-red-500 text-red-500" : ""
+              }`}
+            />
+          </button>
         </div>
 
-        <div className="space-y-3 text-sm text-gray-600 mb-6 grow">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-primary shrink-0">
-              <MapPin className="w-4 h-4" />
-            </div>
-            <span className="truncate">
-              {provider.location?.area || "Bangalore"}
+        {/* Rating & Review summary */}
+        <div className="flex items-center justify-between bg-slate-50/80 px-3.5 py-2 rounded-xl mb-4 text-xs font-semibold border border-slate-100">
+          <div className="flex items-center gap-1 text-[#172033]">
+            <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
+            <span className="font-bold">{provider.rating ? provider.rating.toFixed(1) : "New"}</span>
+            <span className="text-slate-400 font-normal">
+              ({provider.totalReviews || 0} reviews)
             </span>
           </div>
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-              <Briefcase className="w-4 h-4" />
-            </div>
-            <span>{provider.experience} Years Experience</span>
+          <div className="text-slate-500 font-medium">
+            {provider.experience || 1}+ yrs exp
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
+        {/* Info Rows */}
+        <div className="space-y-2 text-xs text-slate-600 mb-5 grow">
+          <div className="flex items-center gap-2 text-slate-600">
+            <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+            <span className="truncate">{provider.location?.area || "Bangalore"}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600">
+            <Briefcase className="w-4 h-4 text-slate-400 shrink-0" />
+            <span>Available for booking</span>
+          </div>
+        </div>
+
+        {/* Bottom Price & Button */}
+        <div className="flex items-center justify-between pt-3.5 border-t border-slate-100 mt-auto">
           <div className="flex flex-col">
-            <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-              Starts at
+            <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">
+              Rate
             </span>
-            <div className="text-gray-900 font-extrabold text-xl">
-              ₹{provider.pricePerHour}
-              <span className="text-xs text-gray-500 font-normal ml-1">
-                /hr
-              </span>
+            <div className="text-[#0F2747] font-black text-lg leading-none">
+              ₹{provider.pricePerHour || provider.hourlyRate || 299}
+              <span className="text-xs text-slate-500 font-normal">/hr</span>
             </div>
           </div>
+
           <button
             onClick={() => {
               if (!isAuthenticated) {
@@ -178,9 +186,10 @@ const ProviderCard = ({ provider }) => {
                 navigate(`/provider/${provider._id}`);
               }
             }}
-            className="bg-primary hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md shadow-blue-100 hover:shadow-lg transition-all active:scale-95"
+            className="inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0B5F59] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
           >
-            View Profile
+            <span>View Profile</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

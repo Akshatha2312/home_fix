@@ -3,11 +3,19 @@ import {
   Star,
   TrendingUp,
   IndianRupee,
-  CheckCircle,
+  CheckCircle2,
   Eye,
   EyeOff,
   Loader,
   AlertCircle,
+  Clock,
+  Bell,
+  User,
+  ShieldCheck,
+  Calendar,
+  MapPin,
+  ChevronRight,
+  Briefcase,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import BookingCard from "../components/common/BookingCard";
@@ -22,6 +30,7 @@ const ProviderDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [providerProfile, setProviderProfile] = useState(null);
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -37,6 +46,7 @@ const ProviderDashboard = () => {
 
       if (profileResponse?.success) {
         setIsOnline(profileResponse.provider.availability);
+        setProviderProfile(profileResponse.provider);
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -51,8 +61,6 @@ const ProviderDashboard = () => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // ... socket effect ...
-
   const handleToggleOnline = async () => {
     try {
       const response = await providerAPI.toggleAvailability();
@@ -60,26 +68,25 @@ const ProviderDashboard = () => {
         setIsOnline(response.data.availability);
         toast.success(
           response.data.availability
-            ? "You are now online"
+            ? "You are now online & visible to customers"
             : "You are now offline",
         );
       }
     } catch (error) {
       console.error("Error toggling availability:", error);
-      toast.error("Failed to update status");
+      toast.error("Failed to update availability status");
     }
   };
 
   useEffect(() => {
     if (socket) {
       socket.on("new-booking", (data) => {
-        toast.success(data.message);
+        toast.success(data.message || "New booking request received!");
         setBookings((prev) => [data.booking, ...prev]);
-        // Also play a sound if possible? For now, just toast.
       });
 
       socket.on("booking-cancelled", (data) => {
-        toast.error(data.message);
+        toast.error(data.message || "A booking was cancelled");
         setBookings((prev) =>
           prev.map((b) =>
             b._id === data.booking._id ? { ...b, status: "cancelled" } : b,
@@ -105,20 +112,16 @@ const ProviderDashboard = () => {
     if (!statusUpdate) return;
 
     try {
-      // If it's a rejection, we might want to use the cancel endpoint or status update.
-      // The controller has updateBookingStatus which takes any status.
-      // Let's use updateStatus.
       await bookingsAPI.updateStatus(bookingId, statusUpdate);
-
       setBookings((prev) =>
         prev.map((b) =>
           b._id === bookingId ? { ...b, status: statusUpdate } : b,
         ),
       );
-      toast.success(`Booking ${statusUpdate}`);
+      toast.success(`Booking ${statusUpdate} successfully`);
     } catch (err) {
       console.error("Failed to update booking:", err);
-      toast.error(err.message || "Failed to update booking");
+      toast.error(err.message || "Failed to update booking status");
     }
   };
 
@@ -126,8 +129,6 @@ const ProviderDashboard = () => {
   const upcoming = bookings.filter((b) => b.status === "accepted");
   const completed = bookings.filter((b) => b.status === "completed");
 
-  // Calculate total earnings from completed bookings
-  // Note: estimatedCost is used as a proxy for actual cost often in these simple apps
   const totalEarnings = completed.reduce(
     (sum, b) => sum + (b.estimatedCost || 0),
     0,
@@ -138,34 +139,34 @@ const ProviderDashboard = () => {
       label: "Total Earnings",
       value: `₹${totalEarnings.toLocaleString()}`,
       icon: IndianRupee,
-      color: "from-green-500 to-emerald-600",
+      bgColor: "bg-emerald-50 text-[#16A34A]",
+    },
+    {
+      label: "Pending Requests",
+      value: newRequests.length,
+      icon: Clock,
+      bgColor: "bg-amber-50 text-[#F59E0B]",
+    },
+    {
+      label: "Upcoming Jobs",
+      value: upcoming.length,
+      icon: Bell,
+      bgColor: "bg-teal-50 text-[#0F766E]",
     },
     {
       label: "Completed Jobs",
       value: completed.length,
-      icon: CheckCircle,
-      color: "from-blue-500 to-blue-600",
-    },
-    {
-      label: "Avg Rating",
-      value: user?.rating || "New", // specific to provider user object usually
-      icon: Star,
-      color: "from-yellow-500 to-orange-500",
-    },
-    {
-      label: "Total Bookings",
-      value: bookings.length,
-      icon: TrendingUp,
-      color: "from-purple-500 to-indigo-600",
+      icon: CheckCircle2,
+      bgColor: "bg-slate-100 text-[#0F2747]",
     },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader className="w-8 h-8 text-primary-600 animate-spin" />
-          <p className="text-gray-500">Loading your dashboard...</p>
+      <div className="min-h-screen bg-[#F8FAFC] pt-24 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader className="w-8 h-8 text-[#0F766E] animate-spin" />
+          <p className="text-sm font-semibold text-slate-500">Loading provider workspace...</p>
         </div>
       </div>
     );
@@ -173,18 +174,18 @@ const ProviderDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-sm border border-red-100 max-w-md">
-          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6 text-red-500" />
+      <div className="min-h-screen bg-[#F8FAFC] pt-24 flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-2xs border border-red-100 max-w-md">
+          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#DC2626]">
+            <AlertCircle className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-lg font-bold text-[#0F2747] mb-2">
             Something went wrong
           </h3>
-          <p className="text-gray-500 mb-6">{error}</p>
+          <p className="text-sm text-slate-500 mb-6">{error}</p>
           <button
             onClick={fetchDashboardData}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="px-6 py-2.5 bg-[#0F766E] text-white font-bold text-sm rounded-xl hover:bg-[#0B5F59] transition-colors"
           >
             Try Again
           </button>
@@ -194,77 +195,90 @@ const ProviderDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="min-h-screen bg-[#F8FAFC] pt-20 text-[#172033] font-sans pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 1 & 9. PROVIDER HEADER & ONLINE TOGGLE */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Provider Dashboard
+            <span className="text-xs font-bold text-[#0F766E] uppercase tracking-wider bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+              Provider Workspace
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] mt-2 tracking-tight">
+              Good morning, {user?.name?.split(" ")[0] || "Partner"}!
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Welcome back, {user?.name?.split(" ")[0] || "Provider"}
+            <p className="text-sm text-slate-500 font-medium mt-1">
+              Here is what's happening with your HomeFix bookings today.
             </p>
           </div>
+
           <div className="flex items-center gap-3">
             <button
               onClick={handleToggleOnline}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-2xs cursor-pointer border ${
                 isOnline
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-gray-50 text-gray-700 border border-gray-200"
+                  ? "bg-emerald-50 text-[#16A34A] border-emerald-200"
+                  : "bg-slate-100 text-slate-600 border-slate-200"
               }`}
             >
               {isOnline ? (
                 <>
-                  <Eye className="w-4 h-4" />
-                  <span>Online</span>
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <div className="w-2.5 h-2.5 bg-[#16A34A] rounded-full animate-ping"></div>
+                  <span>● Online (Visible to Customers)</span>
                 </>
               ) : (
                 <>
-                  <EyeOff className="w-4 h-4" />
-                  <span>Offline</span>
+                  <div className="w-2.5 h-2.5 bg-slate-400 rounded-full"></div>
+                  <span>○ Offline (Hidden from Search)</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* 3. STATISTICS SECTION */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 card-hover"
+              className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 flex items-center gap-4 hover:border-teal-200 transition-all"
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-11 h-11 bg-linear-to-br ${stat.color} rounded-xl flex items-center justify-center`}
-                >
-                  <stat.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stat.value}
-                  </p>
-                </div>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bgColor}`}
+              >
+                <stat.icon className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  {stat.label}
+                </p>
+                <p className="text-2xl sm:text-3xl font-black text-[#0F2747]">
+                  {stat.value}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* New Requests */}
-          <div className="lg:col-span-2 space-y-6">
-            {newRequests.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-                  New Requests ({newRequests.length})
+        {/* 13. TWO-COLUMN WORKSPACE */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* LEFT COLUMN: REQUESTS & SCHEDULE */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* 4. NEW BOOKING REQUESTS */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h2 className="text-base font-extrabold text-[#0F2747] uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 bg-[#F59E0B] rounded-full animate-pulse"></span>
+                  New Booking Requests ({newRequests.length})
                 </h2>
-                <div className="space-y-3">
+                {newRequests.length > 0 && (
+                  <span className="text-xs font-bold text-[#F59E0B] bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
+                    Action Required
+                  </span>
+                )}
+              </div>
+
+              {newRequests.length > 0 ? (
+                <div className="space-y-4">
                   {newRequests.map((booking) => (
                     <BookingCard
                       key={booking._id}
@@ -274,122 +288,157 @@ const ProviderDashboard = () => {
                     />
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-[#0F2747] mb-1">
+                    No Pending Requests
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto">
+                    New customer booking requests will appear here in real time.
+                  </p>
+                </div>
+              )}
+            </div>
 
-            {/* Upcoming */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Upcoming Schedule
-              </h2>
+            {/* 5. UPCOMING JOBS */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h2 className="text-base font-extrabold text-[#0F2747] uppercase tracking-wider flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-[#0F766E]" /> Upcoming Schedule ({upcoming.length})
+                </h2>
+              </div>
+
               {upcoming.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {upcoming.map((booking) => (
                     <BookingCard
                       key={booking._id}
                       booking={booking}
                       userType="provider"
+                      onAction={handleAction}
                     />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 bg-white rounded-2xl border border-gray-100">
-                  <p className="text-3xl mb-2">📅</p>
-                  <p className="text-sm text-gray-500">No upcoming bookings</p>
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
+                    <Calendar className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-[#0F2747] mb-1">
+                    No Upcoming Jobs
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto">
+                    Accepted bookings scheduled for future dates will show here.
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* Completed */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Recent Completions
-              </h2>
+            {/* 12. COMPLETED JOBS */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <h2 className="text-base font-extrabold text-[#0F2747] uppercase tracking-wider flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#16A34A]" /> Completed Jobs ({completed.length})
+                </h2>
+              </div>
+
               {completed.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {completed.map((booking) => (
                     <BookingCard
                       key={booking._id}
                       booking={booking}
                       userType="provider"
+                      onAction={handleAction}
                     />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-10 bg-white rounded-2xl border border-gray-100">
-                  <p className="text-3xl mb-2">✅</p>
-                  <p className="text-sm text-gray-500">No completed jobs yet</p>
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
+                    <CheckCircle2 className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-[#0F2747] mb-1">
+                    No Completed Jobs Yet
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto">
+                    Jobs marked as completed will be recorded here for your earnings history.
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* RIGHT COLUMN: PROVIDER PROFILE SUMMARY & QUICK STATS */}
           <div className="space-y-6">
-            {/* Pro Status Card */}
-            <div className="bg-linear-to-br from-primary-600 to-secondary-600 rounded-2xl p-6 text-white shadow-lg">
-              <h3 className="font-bold text-lg mb-1">Pro Status</h3>
-              <p className="text-sm text-blue-100 mb-4">
-                You are currently {isOnline ? "visible" : "hidden"} to
-                customers.
-              </p>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-200">Response Rate</span>
-                  <span className="font-semibold">95%</span>
+            {/* 2. PROVIDER PROFILE SUMMARY */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
+              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+                <div className="w-14 h-14 rounded-2xl bg-teal-50 text-[#0F766E] font-black text-xl flex items-center justify-center border border-teal-100 shrink-0">
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.name}
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  ) : (
+                    (user?.name?.[0] || "P").toUpperCase()
+                  )}
                 </div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div
-                    className="bg-white rounded-full h-2"
-                    style={{ width: "95%" }}
-                  ></div>
+                <div>
+                  <h3 className="font-extrabold text-[#0F2747] text-lg leading-tight flex items-center gap-1.5">
+                    {user?.name || "Partner"}
+                    {providerProfile?.isVerified && (
+                      <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
+                    )}
+                  </h3>
+                  <p className="text-xs font-bold text-[#0F766E] uppercase tracking-wider mt-0.5">
+                    {providerProfile?.serviceType || user?.serviceType || "Service"} Partner
+                  </p>
                 </div>
               </div>
-              <div className="mt-4 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-blue-200">Completion Rate</span>
-                  <span className="font-semibold">98%</span>
+
+              <div className="space-y-2.5 text-xs font-semibold text-slate-600 mb-4">
+                <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <span className="text-slate-400">Rating</span>
+                  <div className="flex items-center gap-1 font-extrabold text-[#0F2747]">
+                    <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
+                    <span>{providerProfile?.rating ? providerProfile.rating.toFixed(1) : (user?.rating || "5.0")}</span>
+                  </div>
                 </div>
-                <div className="w-full bg-white/20 rounded-full h-2">
-                  <div
-                    className="bg-white rounded-full h-2"
-                    style={{ width: "98%" }}
-                  ></div>
+                <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <span className="text-slate-400">Experience</span>
+                  <span className="font-bold text-[#0F2747]">
+                    {providerProfile?.experience || user?.experience || 1} Years
+                  </span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <span className="text-slate-400">Location</span>
+                  <span className="font-bold text-[#0F2747]">
+                    {providerProfile?.location?.area || "Bangalore"}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Quick stats */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-              <h3 className="font-bold text-gray-900 mb-4">This Week</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Jobs completed</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {completed.length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Revenue</span>
-                  <span className="text-sm font-bold text-green-600">
-                    ₹{totalEarnings.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">New reviews</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {completed.filter((b) => b.rating).length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Avg. rating</span>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-bold text-gray-900">
-                      {user?.rating || 0}
-                    </span>
-                  </div>
-                </div>
+            {/* Performance Overview Banner */}
+            <div className="bg-gradient-to-br from-[#0F2747] to-[#0A1D35] text-white p-6 rounded-2xl shadow-md border border-slate-800">
+              <div className="flex items-center gap-2 mb-2 text-teal-300">
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-xs font-extrabold uppercase tracking-wider">
+                  Partner Quality Badge
+                </span>
+              </div>
+              <h4 className="font-extrabold text-base mb-1">Top Reliability Status</h4>
+              <p className="text-xs text-slate-300 leading-relaxed font-medium mb-4">
+                You are currently in good standing. Maintain prompt acceptance rates for higher placement in service search results.
+              </p>
+              <div className="pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-400">Status</span>
+                <span className="text-[#16A34A] font-bold">Active & Verified</span>
               </div>
             </div>
           </div>

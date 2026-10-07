@@ -121,10 +121,10 @@ const TimeSelector = ({
               py-3 px-2 rounded-lg text-sm font-medium transition-all border
               ${
                 isDisabled
-                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed box-decoration-slice"
+                  ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed box-decoration-slice"
                   : isSelected
-                    ? "bg-blue-500 text-white border-blue-500 shadow-md"
-                    : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                    ? "bg-[#0F766E] text-white border-[#0F766E] shadow-md"
+                    : "bg-white text-slate-700 border-slate-200 hover:border-teal-300 hover:bg-teal-50"
               }
             `}
           >

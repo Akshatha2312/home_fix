@@ -127,87 +127,87 @@ const AdminProviders = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-[#0F2747]">
           Providers Management
         </h1>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search providers..."
-            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F766E] text-slate-800 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
         {/* Desktop Table View */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left min-w-[700px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Provider
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Service
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Stats
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Status
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase text-right">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {filteredProviders.map((provider) => (
-                <tr key={provider._id} className="hover:bg-gray-50">
+                <tr key={provider._id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-[#0F2747] font-bold shrink-0">
                       {provider.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">
+                      <h3 className="font-medium text-slate-900 truncate">
                         {provider.name}
                       </h3>
-                      <p className="text-xs text-gray-500 truncate">{provider.email}</p>
+                      <p className="text-xs text-slate-500 truncate">{provider.email}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium capitalize">
+                    <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-medium capitalize">
                       {provider.serviceType}
                     </span>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-slate-400 mt-1">
                       {provider.experience} yrs exp
                     </p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-1 text-yellow-500">
+                    <div className="flex items-center gap-1 text-[#F59E0B]">
                       <Star className="w-3.5 h-3.5 fill-current" />
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-slate-700">
                         {provider.rating ? provider.rating.toFixed(1) : "N/A"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-slate-400">
                       {provider.totalBookings || 0} bookings
                     </p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       {provider.availability ? (
-                        <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span className="flex items-center gap-1 text-xs font-medium text-[#16A34A] bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse"></div>
                           Online
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-200">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                        <span className="flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
                           Offline
                         </span>
                       )}
@@ -217,7 +217,7 @@ const AdminProviders = () => {
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => handleViewStats(provider)}
-                        className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-[#0F766E] bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
                       >
                         Health Card
                       </button>
@@ -243,7 +243,7 @@ const AdminProviders = () => {
             <div key={provider._id} className="p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-[#0F766E] font-bold shrink-0">
                     {provider.name.charAt(0)}
                   </div>
                   <div className="min-w-0">

@@ -5,20 +5,28 @@
 
 /* Custom Tailwind theme */
 @theme {
-  --color-primary: #3b82f6;
-  --color-secondary: #10b981;
-  --color-accent: #f59e0b;
+  --color-navy: #0F2747;
+  --color-navy-dark: #0A1D35;
 
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  --color-teal: #0F766E;
+  --color-teal-dark: #0B5F59;
+
+  --color-amber: #F59E0B;
+  --color-soft-white: #F8FAFC;
+
+  --color-primary-text: #172033;
+  --color-secondary-text: #64748B;
+  --color-light-slate: #E2E8F0;
+
+  --color-success: #16A34A;
+  --color-error: #DC2626;
+
+  /* Color mapping overrides for Tailwind default tokens */
+  --color-primary: #0F2747;
+  --color-primary-hover: #0A1D35;
+  --color-secondary: #0F766E;
+  --color-secondary-hover: #0B5F59;
+  --color-accent: #F59E0B;
 
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
@@ -37,13 +45,15 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
+  background-color: var(--color-soft-white);
+  color: var(--color-primary-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Gradient text utility */
 .gradient-text {
-  background: linear-gradient(135deg, #2563eb, #8b5cf6);
+  background: linear-gradient(135deg, var(--color-navy), var(--color-teal));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -62,7 +72,7 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(15, 39, 71, 0.08);
 }
 
 /* Custom scrollbar */
@@ -73,11 +83,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--color-light-slate);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--color-secondary-text);
 }
 
 /* Hide scrollbar utility */
@@ -206,7 +216,7 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
-  background: #e5e7eb;
+  background: #E2E8F0;
   border-radius: 3px;
   outline: none;
 }
@@ -216,7 +226,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #2563eb;
+  background: #0F766E;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
 }

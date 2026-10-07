@@ -68,27 +68,27 @@ const RegisterPage = () => {
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 animate-fade-in-up">
           <div className="text-center mb-8">
             <Link to="/" className="inline-flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#0F2747] to-[#0F766E] rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-white font-bold text-xl">H</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-[#0F2747]">
                 Home<span className="gradient-text">Fix</span>
               </span>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-[#0F2747]">Create Account</h1>
+            <p className="text-sm text-slate-500 mt-1">
               Join HomeFix as a customer or provider
             </p>
           </div>
 
           {/* Type Toggle */}
-          <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+          <div className="flex bg-slate-100 rounded-xl p-1 mb-6">
             <button
               onClick={() => setUserType("customer")}
               className={`flex-1 py-2.5 text-sm font-medium text-center rounded-lg transition-all ${
                 userType === "customer"
-                  ? "bg-white shadow-sm text-primary-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white shadow-xs text-[#0F766E] font-semibold"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               🏠 Customer
@@ -97,8 +97,8 @@ const RegisterPage = () => {
               onClick={() => setUserType("provider")}
               className={`flex-1 py-2.5 text-sm font-medium text-center rounded-lg transition-all ${
                 userType === "provider"
-                  ? "bg-white shadow-sm text-primary-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white shadow-xs text-[#0F766E] font-semibold"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               🔧 Service Provider
@@ -318,7 +318,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl hover:from-primary-600 hover:to-primary-700 shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 bg-[#0F766E] hover:bg-[#0B5F59] text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -331,11 +331,11 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          <p className="text-center mt-6 text-sm text-gray-500">
+          <p className="text-center mt-6 text-sm text-slate-500">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-primary-600 font-medium hover:underline"
+              className="text-[#0F766E] font-medium hover:underline"
             >
               Sign In
             </Link>

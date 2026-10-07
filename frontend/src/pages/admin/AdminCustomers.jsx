@@ -91,46 +91,46 @@ const AdminCustomers = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-[#0F2747]">
           Customers Management
         </h1>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search customers..."
-            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F766E] text-slate-800 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
         {/* Desktop Table View */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left min-w-[600px]">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Customer
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Contact
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">
                   Registered
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
+                <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase text-right">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {filteredCustomers.map((customer) => (
-                <tr key={customer._id} className="hover:bg-gray-50">
+                <tr key={customer._id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-[#0F766E] font-bold shrink-0">
                       {customer.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -171,7 +171,7 @@ const AdminCustomers = () => {
             <div key={customer._id} className="p-4 space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-[#0F766E] font-bold shrink-0">
                     {customer.name.charAt(0)}
                   </div>
                   <div className="min-w-0">

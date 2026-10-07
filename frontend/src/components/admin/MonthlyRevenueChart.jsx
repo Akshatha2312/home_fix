@@ -30,11 +30,11 @@ const MonthlyRevenueChart = ({ data }) => {
         label: "Monthly Revenue",
         data: data.map((d) => d.revenue),
         fill: true,
-        backgroundColor: "rgba(16, 185, 129, 0.2)", // Pascal Green-ish with opacity
-        borderColor: "rgba(16, 185, 129, 1)", // Pascal Green
+        backgroundColor: "rgba(15, 118, 110, 0.15)", // Teal with opacity
+        borderColor: "#0F766E", // Teal
         borderWidth: 2,
         tension: 0.4, // Smooth edges
-        pointBackgroundColor: "rgba(16, 185, 129, 1)",
+        pointBackgroundColor: "#0F766E",
         pointBorderColor: "#fff",
         pointBorderWidth: 2,
         pointRadius: 4,
