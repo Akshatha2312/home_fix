@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   X,
   TrendingUp,
@@ -21,7 +20,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { useAuth } from "../../hooks/useAuth";
+import { adminAPI } from "../../services/api";
 
 ChartJS.register(
   CategoryScale,
@@ -34,24 +33,17 @@ ChartJS.register(
   Legend,
 );
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
 const ProviderHealthModal = ({ isOpen, onClose, provider }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [chartView, setChartView] = useState("daily"); // daily, weekly, monthly
-  const { token } = useAuth();
 
   const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const { data } = await axios.get(
-        `${API_URL}/admin/providers/${provider._id}/stats`,
-        config,
-      );
+      const data = await adminAPI.getProviderStats(provider._id);
 
       if (data.success) {
         setStats(data);
@@ -64,7 +56,7 @@ const ProviderHealthModal = ({ isOpen, onClose, provider }) => {
     } finally {
       setLoading(false);
     }
-  }, [provider, token]);
+  }, [provider]);
 
   useEffect(() => {
     if (isOpen && provider?._id) {

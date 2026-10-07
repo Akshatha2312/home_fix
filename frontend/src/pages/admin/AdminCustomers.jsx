@@ -4,7 +4,6 @@
  * Supports pagination for large lists.
  */
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   Trash2,
   Search,
@@ -13,9 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { adminAPI } from "../../services/api";
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -23,7 +20,6 @@ const AdminCustomers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const { token } = useAuth();
 
   // Delete Modal State
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -33,11 +29,7 @@ const AdminCustomers = () => {
     async (page = 1) => {
       try {
         setLoading(true);
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get(
-          `${API_URL}/admin/customers?page=${page}&limit=15`,
-          config,
-        );
+        const data = await adminAPI.getCustomers(page, 15);
         if (data.success) {
           setCustomers(data.customers);
           setCurrentPage(data.currentPage);
@@ -49,7 +41,7 @@ const AdminCustomers = () => {
         setLoading(false);
       }
     },
-    [token],
+    [],
   );
 
   useEffect(() => {
@@ -73,11 +65,7 @@ const AdminCustomers = () => {
 
   const confirmDelete = async () => {
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(
-        `${API_URL}/admin/users/${selectedUser._id}?type=customer`,
-        config,
-      );
+      await adminAPI.deleteUser(selectedUser._id, "customer");
 
       // Refresh list
       refreshCustomers();

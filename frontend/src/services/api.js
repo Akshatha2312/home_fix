@@ -89,4 +89,18 @@ export const paymentsAPI = {
   getHistory: () => api.get("/payments/history"),
 };
 
+// Admin API
+export const adminAPI = {
+  getDashboard: () => api.get("/admin/dashboard"),
+  getBookings: (page = 1, limit = 5) =>
+    api.get("/admin/bookings", { params: { page, limit } }),
+  getCustomers: (page = 1, limit = 15) =>
+    api.get("/admin/customers", { params: { page, limit } }),
+  getProviders: (page = 1, limit = 15) =>
+    api.get("/admin/providers", { params: { page, limit } }),
+  deleteUser: (id, type) =>
+    api.delete(`/admin/users/${id}`, { params: { type } }),
+  getProviderStats: (id) => api.get(`/admin/providers/${id}/stats`),
+};
+
 export default api;

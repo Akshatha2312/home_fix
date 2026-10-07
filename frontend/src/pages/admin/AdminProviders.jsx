@@ -4,7 +4,6 @@
  * Features real-time availability updates via Socket.io.
  */
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   Trash2,
   Search,
@@ -13,11 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
 import { useSocket } from "../../context/socket";
 import ProviderHealthModal from "../../components/admin/ProviderHealthModal";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { adminAPI } from "../../services/api";
 
 const AdminProviders = () => {
   const [providers, setProviders] = useState([]);
@@ -25,7 +22,6 @@ const AdminProviders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const { token } = useAuth();
   const { socket } = useSocket();
 
   // Delete Modal State
@@ -40,11 +36,7 @@ const AdminProviders = () => {
     async (page = 1) => {
       try {
         setLoading(true);
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const { data } = await axios.get(
-          `${API_URL}/admin/providers?page=${page}&limit=15`,
-          config,
-        );
+        const data = await adminAPI.getProviders(page, 15);
         if (data.success) {
           setProviders(data.providers);
           setCurrentPage(data.currentPage);
@@ -56,7 +48,7 @@ const AdminProviders = () => {
         setLoading(false);
       }
     },
-    [token],
+    [],
   );
 
   useEffect(() => {
@@ -100,11 +92,7 @@ const AdminProviders = () => {
 
   const confirmDelete = async () => {
     try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(
-        `${API_URL}/admin/users/${selectedUser._id}?type=provider`,
-        config,
-      );
+      await adminAPI.deleteUser(selectedUser._id, "provider");
 
       refreshProviders();
       setShowDeleteModal(false);

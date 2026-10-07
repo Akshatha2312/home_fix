@@ -4,7 +4,6 @@
  * Features real-time updates via Socket.io for new bookings and status changes.
  */
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   Users,
   Briefcase,
@@ -19,8 +18,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useSocket } from "../../context/socket";
 import toast from "react-hot-toast";
 import MonthlyRevenueChart from "../../components/admin/MonthlyRevenueChart";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { adminAPI } from "../../services/api";
 
 const StatCard = ({ title, value, icon, color }) => {
   const Icon = icon;
@@ -41,7 +39,6 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { token } = useAuth();
   const { socket } = useSocket();
 
   // Pagination for All Bookings
@@ -53,12 +50,7 @@ const AdminDashboard = () => {
   // Fetch Dashboard Stats
   const fetchStats = useCallback(async () => {
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const { data } = await axios.get(`${API_URL}/admin/dashboard`, config);
+      const data = await adminAPI.getDashboard();
       if (data.success) {
         setStats(data.stats);
         setRecentBookings(data.recentBookings);
@@ -68,22 +60,14 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   // Fetch All Bookings (Paginated)
   const fetchAllBookings = useCallback(
     async (page) => {
       try {
         setTableLoading(true);
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-        const { data } = await axios.get(
-          `${API_URL}/admin/bookings?page=${page}&limit=5`,
-          config,
-        );
+        const data = await adminAPI.getBookings(page, 5);
         if (data.success) {
           setAllBookings(data.bookings);
           setCurrentPage(data.currentPage);
@@ -95,7 +79,7 @@ const AdminDashboard = () => {
         setTableLoading(false);
       }
     },
-    [token],
+    [],
   );
 
   useEffect(() => {

@@ -54,7 +54,9 @@ const LoginPage = () => {
             <p className="text-sm text-gray-500 mt-1">
               {loginType === "provider"
                 ? "Login to manage your bookings"
-                : "Login to book services"}
+                : loginType === "admin"
+                  ? "Login to access the admin panel"
+                  : "Login to book services"}
             </p>
           </div>
 
@@ -79,6 +81,16 @@ const LoginPage = () => {
               }`}
             >
               Provider
+            </Link>
+            <Link
+              to="/login?type=admin"
+              className={`flex-1 py-2.5 text-sm font-medium text-center rounded-lg transition-all ${
+                loginType === "admin"
+                  ? "bg-white shadow-sm text-primary-600"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Admin
             </Link>
           </div>
 
