@@ -294,7 +294,7 @@ const ServicesPage = () => {
               Verified Providers Only
             </span>
             <span className="text-[10px] text-slate-500 font-medium">
-              Background checked partners
+              Verified partners
             </span>
           </div>
           <div className="relative inline-flex items-center">
@@ -314,15 +314,12 @@ const ServicesPage = () => {
   return (
     <div className="bg-[#F8FAFC] min-h-screen text-[#172033] font-sans pb-16">
       {/* 1. DISCOVERY HEADER */}
-      <header className="bg-white border-b border-slate-200/80 pt-8 pb-6">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="max-w-3xl mb-6">
-            <h1 className="text-3xl sm:text-4xl font-black text-[#0F2747] tracking-tight">
+      <header className="bg-white border-b border-slate-200/80 pt-6 pb-4">
+        <div className="w-full max-w-[1920px] mx-auto px-6 lg:px-10">
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] tracking-tight">
               Find the Right Professional for Your Home
             </h1>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Browse background-checked local experts by service, rating, pricing, and availability.
-            </p>
           </div>
 
           {/* Search Input Bar */}
@@ -392,7 +389,7 @@ const ServicesPage = () => {
       </header>
 
       {/* MAIN CONTENT AREA */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="w-full max-w-[1920px] mx-auto px-6 lg:px-10 py-6">
         <div className="flex flex-col md:flex-row gap-8">
           {/* DESKTOP FILTER SIDEBAR */}
           <aside className="hidden md:block w-64 shrink-0">
@@ -550,7 +547,7 @@ const ServicesPage = () => {
             )}
 
             {/* 6 & 12. PROVIDER GRID & SKELETON LOADING */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {loading
                 ? [...Array(6)].map((_, i) => (
                     <div

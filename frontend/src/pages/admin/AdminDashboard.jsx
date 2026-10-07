@@ -24,6 +24,7 @@ import { useSocket } from "../../context/socket";
 import toast from "react-hot-toast";
 import MonthlyRevenueChart from "../../components/admin/MonthlyRevenueChart";
 import { adminAPI } from "../../services/api";
+import { getGreeting } from "../../utils/greeting";
 
 const StatCard = ({ title, value, icon, color }) => {
   const Icon = icon;
@@ -153,15 +154,15 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-8 text-[#172033] font-sans">
+    <div className="space-y-6 text-[#172033] font-sans">
       {/* 1. ADMIN HEADER */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-xs font-bold text-[#0F766E] uppercase tracking-wider bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
             Platform Operations
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] mt-2 tracking-tight">
-            Good morning, Admin!
+            {getGreeting()}, Admin!
           </h1>
           <p className="text-sm text-slate-500 font-medium mt-1">
             Real-time control center overview for customers, providers, and revenue.

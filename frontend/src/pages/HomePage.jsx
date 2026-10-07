@@ -28,7 +28,6 @@ import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../context/socket";
 import FAQSection from "../components/common/FAQSection";
-import PromotionalBanner from "../components/common/PromotionalBanner";
 
 const SERVICE_ICONS = {
   plumber: Wrench,
@@ -614,7 +613,7 @@ const HomePage = () => {
                 Top-Rated Professionals
               </h2>
               <p className="text-slate-600 text-base mt-1">
-                Find trusted, background-checked experts ready to help
+                Find trusted experts ready to help
               </p>
             </div>
             <Link
@@ -824,7 +823,7 @@ const HomePage = () => {
                 <Clock className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-[#0F2747]">
-                On-Time Service Guaranteed
+                Punctual Service
               </h3>
               <p className="text-slate-600 text-sm leading-relaxed">
                 We respect your schedule. Our providers are committed to punctual arrivals and efficient service delivery.
@@ -846,44 +845,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* 7. SERVICE CATEGORY STRIP (Compact Discovery) */}
-      <section className="py-12 bg-slate-100/70 border-b border-slate-200/80">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-            <h3 className="text-base font-bold text-[#0F2747] uppercase tracking-wider flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-[#0F766E]" /> Quick Category Discovery
-            </h3>
-            <span className="text-xs font-semibold text-slate-500">
-              Select a service to filter immediately
-            </span>
-          </div>
-
-          <div className="flex flex-wrap gap-3 items-center">
-            {LOCAL_SERVICE_TYPES.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/services?type=${cat.id}`}
-                className="bg-white hover:bg-teal-50 text-[#0F2747] hover:text-[#0F766E] px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 hover:border-teal-200 transition-all flex items-center gap-2 shadow-2xs"
-              >
-                <span>{cat.name}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              </Link>
-            ))}
-            <Link
-              to="/services"
-              className="bg-[#0F766E] text-white hover:bg-[#0B5F59] px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-2xs"
-            >
-              All Categories →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. FREQUENTLY ASKED QUESTIONS */}
+      {/* FREQUENTLY ASKED QUESTIONS */}
       <FAQSection />
-
-      {/* 9. PROMOTIONAL BANNER */}
-      <PromotionalBanner />
 
       {/* 10. FINAL CTA SECTION */}
       <section className="py-20 bg-[#0F2747] text-white relative overflow-hidden">

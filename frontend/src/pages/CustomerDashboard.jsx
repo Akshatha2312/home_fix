@@ -28,6 +28,7 @@ import toast from "react-hot-toast";
 import { bookingsAPI, paymentsAPI } from "../services/api";
 import { useSocket } from "../context/socket";
 import { loadRazorpay } from "../utils/loadRazorpay";
+import { getGreeting } from "../utils/greeting";
 import { SERVICE_TYPES } from "../config/constants";
 
 const SERVICE_ICONS = {
@@ -292,15 +293,15 @@ const CustomerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pt-20 text-[#172033] font-sans pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1920px] mx-auto px-6 lg:px-10 py-6">
         {/* 1. DASHBOARD HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div>
             <span className="text-xs font-bold text-[#0F766E] uppercase tracking-wider bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
               Customer Control Center
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] mt-2 tracking-tight">
-              Welcome back, {user?.name?.split(" ")[0] || "Customer"}!
+              {getGreeting()}, {user?.name?.split(" ")[0] || "Customer"}!
             </h1>
             <p className="text-sm text-slate-500 font-medium mt-1">
               Here is the real-time overview of your HomeFix service requests and history.
@@ -482,19 +483,19 @@ const CustomerDashboard = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-[#0F766E] shadow-2xs">
-                    <Calendar className="w-6 h-6" />
+                <div className="text-center py-5 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-[#0F766E] shadow-2xs">
+                    <Calendar className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-bold text-[#0F2747] mb-1">
                     No Upcoming Services
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto mb-4">
-                    Need help with plumbing, electrical, or cleaning? Book a top-rated professional.
+                  <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto mb-3">
+                    Need help with home repairs? Book a top-rated professional.
                   </p>
                   <Link
                     to="/services"
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#0F766E] text-white text-xs font-bold rounded-xl hover:bg-[#0B5F59] transition-all"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0F766E] text-white text-xs font-bold rounded-xl hover:bg-[#0B5F59] transition-all"
                   >
                     <span>Browse Services</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -606,20 +607,6 @@ const CustomerDashboard = () => {
                   );
                 })}
               </div>
-            </div>
-
-            {/* HomeFix Guarantee Summary Card */}
-            <div className="bg-gradient-to-br from-[#0F2747] to-[#0A1D35] text-white p-5 rounded-2xl shadow-md border border-slate-800">
-              <div className="flex items-center gap-2 mb-2 text-teal-300">
-                <ShieldCheck className="w-5 h-5" />
-                <span className="text-xs font-extrabold uppercase tracking-wider">
-                  HomeFix Trust Promise
-                </span>
-              </div>
-              <h4 className="font-extrabold text-base mb-1">Punctual & Transparent</h4>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                All listed service partners are background-checked. You pay directly after job completion.
-              </p>
             </div>
           </div>
         </div>

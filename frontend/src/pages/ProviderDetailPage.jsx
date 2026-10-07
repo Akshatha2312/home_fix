@@ -278,7 +278,7 @@ const ProviderDetailPage = () => {
     <div className="bg-[#F8FAFC] text-[#172033] min-h-screen font-sans pb-16">
       {/* Breadcrumb Header */}
       <div className="bg-white border-b border-slate-200/80">
-        <div className="container mx-auto px-4 py-3 text-xs sm:text-sm text-slate-500 flex items-center gap-2 flex-wrap max-w-7xl font-semibold">
+        <div className="w-full max-w-[1920px] mx-auto px-6 lg:px-10 py-3 text-xs sm:text-sm text-slate-500 flex items-center gap-2 flex-wrap font-semibold">
           <Link to="/" className="hover:text-[#0F766E] transition-colors">
             Home
           </Link>
@@ -294,10 +294,10 @@ const ProviderDetailPage = () => {
       </div>
 
       {/* Main Content Area */}
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
+      <main className="w-full max-w-[1920px] mx-auto px-6 lg:px-10 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Left Column: Provider Detail Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             {/* 1. PROVIDER PROFILE HERO */}
             <div className="bg-white rounded-2xl shadow-2xs border border-slate-200/80 p-6 md:p-8 relative overflow-hidden">
               <div className="flex flex-col sm:flex-row gap-6 items-start">
@@ -398,7 +398,7 @@ const ProviderDetailPage = () => {
                     Residential Repair
                   </span>
                   <span className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">
-                    On-Time Guarantee
+                    Punctual Service
                   </span>
                 </div>
               </div>
@@ -484,7 +484,7 @@ const ProviderDetailPage = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-10 px-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                  <div className="text-center py-5 px-4 bg-slate-50 rounded-2xl border border-slate-200/80">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
                       <Star className="w-6 h-6" />
                     </div>

@@ -114,7 +114,7 @@ const AdminLayout = () => {
             </button>
           </div>
         </header>
-        <div className="p-4 sm:p-6 lg:p-8 flex-1 max-w-7xl w-full mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 flex-1 w-full max-w-[1920px] mx-auto">
           <Outlet />
         </div>
       </main>

@@ -22,6 +22,7 @@ import BookingCard from "../components/common/BookingCard";
 import toast from "react-hot-toast";
 import { bookingsAPI, providerAPI } from "../services/api";
 import { useSocket } from "../context/socket";
+import { getGreeting } from "../utils/greeting";
 
 const ProviderDashboard = () => {
   const { user } = useAuth();
@@ -196,15 +197,15 @@ const ProviderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pt-20 text-[#172033] font-sans pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full max-w-[1920px] mx-auto px-6 lg:px-10 py-6">
         {/* 1 & 9. PROVIDER HEADER & ONLINE TOGGLE */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div>
             <span className="text-xs font-bold text-[#0F766E] uppercase tracking-wider bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
               Provider Workspace
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-[#0F2747] mt-2 tracking-tight">
-              Good morning, {user?.name?.split(" ")[0] || "Partner"}!
+              {getGreeting()}, {user?.name?.split(" ")[0] || "Partner"}!
             </h1>
             <p className="text-sm text-slate-500 font-medium mt-1">
               Here is what's happening with your HomeFix bookings today.
@@ -236,22 +237,22 @@ const ProviderDashboard = () => {
         </div>
 
         {/* 3. STATISTICS SECTION */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 flex items-center gap-4 hover:border-teal-200 transition-all"
+              className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-4 flex items-center gap-3 hover:border-teal-200 transition-all"
             >
               <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bgColor}`}
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${stat.bgColor}`}
               >
-                <stat.icon className="w-6 h-6" />
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   {stat.label}
                 </p>
-                <p className="text-2xl sm:text-3xl font-black text-[#0F2747]">
+                <p className="text-xl sm:text-2xl font-black text-[#0F2747]">
                   {stat.value}
                 </p>
               </div>
@@ -289,9 +290,9 @@ const ProviderDashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
-                    <Clock className="w-6 h-6" />
+                <div className="text-center py-5 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 shadow-2xs">
+                    <Clock className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-bold text-[#0F2747] mb-1">
                     No Pending Requests
@@ -323,9 +324,9 @@ const ProviderDashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
-                    <Calendar className="w-6 h-6" />
+                <div className="text-center py-5 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 shadow-2xs">
+                    <Calendar className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-bold text-[#0F2747] mb-1">
                     No Upcoming Jobs
@@ -357,9 +358,9 @@ const ProviderDashboard = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-slate-200/70">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
-                    <CheckCircle2 className="w-6 h-6" />
+                <div className="text-center py-5 bg-slate-50 rounded-2xl border border-slate-200/70">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 shadow-2xs">
+                    <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-bold text-[#0F2747] mb-1">
                     No Completed Jobs Yet
@@ -372,12 +373,12 @@ const ProviderDashboard = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: PROVIDER PROFILE SUMMARY & QUICK STATS */}
+          {/* RIGHT COLUMN: PROVIDER PROFILE SUMMARY */}
           <div className="space-y-6">
             {/* 2. PROVIDER PROFILE SUMMARY */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs">
-              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
-                <div className="w-14 h-14 rounded-2xl bg-teal-50 text-[#0F766E] font-black text-xl flex items-center justify-center border border-teal-100 shrink-0">
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs">
+              <div className="flex items-center gap-3.5 mb-4 pb-4 border-b border-slate-100">
+                <div className="w-12 h-12 rounded-2xl bg-teal-50 text-[#0F766E] font-black text-lg flex items-center justify-center border border-teal-100 shrink-0">
                   {user?.profileImage ? (
                     <img
                       src={user.profileImage}
@@ -389,7 +390,7 @@ const ProviderDashboard = () => {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-[#0F2747] text-lg leading-tight flex items-center gap-1.5">
+                  <h3 className="font-extrabold text-[#0F2747] text-base leading-tight flex items-center gap-1.5">
                     {user?.name || "Partner"}
                     {providerProfile?.isVerified && (
                       <ShieldCheck className="w-4 h-4 text-[#0F766E]" />
@@ -401,7 +402,7 @@ const ProviderDashboard = () => {
                 </div>
               </div>
 
-              <div className="space-y-2.5 text-xs font-semibold text-slate-600 mb-4">
+              <div className="space-y-2 text-xs font-semibold text-slate-600">
                 <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                   <span className="text-slate-400">Rating</span>
                   <div className="flex items-center gap-1 font-extrabold text-[#0F2747]">
@@ -421,24 +422,6 @@ const ProviderDashboard = () => {
                     {providerProfile?.location?.area || "Bangalore"}
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Performance Overview Banner */}
-            <div className="bg-gradient-to-br from-[#0F2747] to-[#0A1D35] text-white p-6 rounded-2xl shadow-md border border-slate-800">
-              <div className="flex items-center gap-2 mb-2 text-teal-300">
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-xs font-extrabold uppercase tracking-wider">
-                  Partner Quality Badge
-                </span>
-              </div>
-              <h4 className="font-extrabold text-base mb-1">Top Reliability Status</h4>
-              <p className="text-xs text-slate-300 leading-relaxed font-medium mb-4">
-                You are currently in good standing. Maintain prompt acceptance rates for higher placement in service search results.
-              </p>
-              <div className="pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs font-semibold">
-                <span className="text-slate-400">Status</span>
-                <span className="text-[#16A34A] font-bold">Active & Verified</span>
               </div>
             </div>
           </div>
