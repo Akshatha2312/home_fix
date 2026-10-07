@@ -34,7 +34,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {!isAdminRoute && <Navbar />}
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/services" element={<ServicesPage />} />

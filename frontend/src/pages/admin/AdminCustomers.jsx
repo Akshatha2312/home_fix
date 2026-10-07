@@ -107,59 +107,97 @@ const AdminCustomers = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Customer
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Contact
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Registered
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredCustomers.map((customer) => (
-              <tr key={customer._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+        {/* Desktop Table View */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-left min-w-[600px]">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Customer
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Contact
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Registered
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredCustomers.map((customer) => (
+                <tr key={customer._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                      {customer.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">
+                        {customer.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        ID: {customer._id.slice(-6)}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    <p className="truncate">{customer.email}</p>
+                    <p className="text-xs text-gray-400">{customer.phone}</p>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    {new Date(customer.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => handleDeleteClick(customer)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete Account"
+                      aria-label={`Delete ${customer.name}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Compact Card View */}
+        <div className="block sm:hidden divide-y divide-gray-100">
+          {filteredCustomers.map((customer) => (
+            <div key={customer._id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
                     {customer.name.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-sm truncate">
                       {customer.name}
                     </h3>
-                    <p className="text-xs text-gray-500">
-                      ID: {customer._id.slice(-6)}
-                    </p>
+                    <p className="text-xs text-gray-400">ID: #{customer._id.slice(-6)}</p>
                   </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  <p>{customer.email}</p>
-                  <p className="text-xs text-gray-400">{customer.phone}</p>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(customer.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <button
-                    onClick={() => handleDeleteClick(customer)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete Account"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+                <button
+                  onClick={() => handleDeleteClick(customer)}
+                  className="p-2 text-red-500 bg-red-50 rounded-lg shrink-0"
+                  aria-label={`Delete ${customer.name}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="bg-gray-50 p-2.5 rounded-lg text-xs space-y-1 text-gray-600">
+                <p className="truncate"><span className="font-semibold text-gray-700">Email:</span> {customer.email}</p>
+                <p><span className="font-semibold text-gray-700">Phone:</span> {customer.phone || "N/A"}</p>
+                <p><span className="font-semibold text-gray-700">Joined:</span> {new Date(customer.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {filteredCustomers.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             No customers found matching "{searchTerm}"

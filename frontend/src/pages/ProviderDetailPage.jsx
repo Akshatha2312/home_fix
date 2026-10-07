@@ -237,23 +237,21 @@ const ProviderDetailPage = () => {
     );
   }
 
-  // Reviews are now fetched from API, but we can keep a fallback if empty for demo purposes?
-  // Actually, let's just use the fetched reviews. If empty, the UI will show nothing or we can show a message.
-  // The backend returns specific structure for reviews: { rating, review, customerId: { name, profileImage }, createdAt }
-  // We need to map it to the UI structure if different.
-  // UI uses: name, initials, rating, date, text.
-
+  // Reviews are fetched from API
   const formattedReviews = reviews.map((r) => ({
-    name: r.customerId?.name || "Anonymous",
+    name: r.customerId?.name || "Anonymous Customer",
     initials: r.customerId?.name
       ? r.customerId.name
           .split(" ")
           .map((n) => n[0])
           .join("")
-      : "A",
-    rating: r.rating,
-    date: new Date(r.createdAt).toLocaleDateString(),
-    text: r.review,
+          .substring(0, 2)
+          .toUpperCase()
+      : "AC",
+    rating: r.rating || 5,
+    date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "Recent",
+    text: r.review || "No detailed review comment provided.",
+    serviceType: r.serviceType || provider?.serviceType || "",
   }));
 
   const serviceLabels = {
@@ -265,115 +263,148 @@ const ProviderDetailPage = () => {
     carpenter: "Carpentry",
   };
 
+  // Check if provider has custom portfolio images
+  const portfolioImages = provider?.portfolio || provider?.workImages || [];
+
   return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen font-sans">
+    <div className="bg-gray-50 text-gray-800 min-h-screen font-sans pb-12">
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-3 text-sm text-gray-500">
-          <Link to="/" className="hover:text-primary">
+        <div className="container mx-auto px-4 py-3 text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+          <Link to="/" className="hover:text-primary transition-colors">
             Home
           </Link>
-          <span className="mx-2">/</span>
-          <Link to="/services" className="hover:text-primary">
+          <span>/</span>
+          <Link to="/services" className="hover:text-primary transition-colors">
             Services
           </Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900 font-medium">Provider Profile</span>
+          <span>/</span>
+          <span className="text-gray-900 font-medium truncate">
+            {provider.name}
+          </span>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Left Column: Profile Info */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Profile Header Card */}
-            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-              <div className="flex flex-col md:flex-row gap-6 items-start">
-                {provider.profileImage ? (
-                  <img
-                    src={provider.profileImage}
-                    alt={provider.name}
-                    className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-md"
-                  />
-                ) : (
-                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 border-4 border-white shadow-md">
-                    <span className="text-3xl font-bold">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="relative shrink-0">
+                  {provider.profileImage ? (
+                    <img
+                      src={provider.profileImage}
+                      alt={provider.name}
+                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-white shadow-sm ring-1 ring-gray-100"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-blue-50 text-primary flex items-center justify-center font-bold text-3xl border-2 border-white shadow-sm ring-1 ring-gray-100">
                       {provider.name.charAt(0)}
+                    </div>
+                  )}
+                  {provider.isVerified && (
+                    <span
+                      title="Identity & Background Verified Provider"
+                      className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full shadow-md ring-2 ring-white"
+                    >
+                      <CheckCircle className="w-4 h-4" />
                     </span>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div className="flex-1 w-full">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        {provider.name}
-                      </h1>
-                      <p className="text-lg text-primary font-medium mb-2">
-                        {serviceLabels[provider.serviceType] ||
-                          provider.serviceType}{" "}
-                        Specialist
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                          {provider.name}
+                        </h1>
+                        {provider.isVerified && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                            <ShieldCheck className="w-3.5 h-3.5" /> Identity Verified
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-base text-primary font-semibold mb-3">
+                        {serviceLabels[provider.serviceType] || provider.serviceType} Specialist
                       </p>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center gap-1 bg-green-50 text-green-700 px-3 py-1 rounded-lg font-bold">
-                        <span>{provider.rating.toFixed(1)}</span>
-                        <Star className="w-4 h-4 fill-current" />
+
+                    <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0 bg-gray-50 sm:bg-transparent p-3 sm:p-0 rounded-lg">
+                      <div className="flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200/60 px-3 py-1 rounded-lg font-bold text-base">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <span>{provider.rating ? provider.rating.toFixed(1) : "New"}</span>
                       </div>
-                      <span className="text-sm text-gray-500 mt-1">
-                        {provider.totalReviews} Reviews
+                      <span className="text-xs text-gray-500 font-medium">
+                        {provider.totalReviews || 0} customer reviews
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-4 border-t border-gray-100 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-gray-400" />
-                      <span>
+                      <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                      <span className="truncate">
                         {provider.location?.area || "Bangalore"}, Bengaluru
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Briefcase className="w-5 h-5 text-gray-400" />
-                      <span>{provider.experience} Years Experience</span>
+                      <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
+                      <span>{provider.experience || 0} Years Experience</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-gray-400" />
-                      <span>Available Today</span>
+                      <Clock className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span className="text-emerald-700 font-medium">Available for Booking</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 border-t border-gray-100 pt-6">
-                <h3 className="text-lg font-semibold mb-3">About</h3>
-                <p className="text-gray-600 leading-relaxed">
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <h2 className="text-base font-bold text-gray-900 mb-2">About Provider</h2>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
                   {provider.description ||
-                    `Certified ${provider.serviceType} professional with over ${provider.experience} years of field experience. Committed to providing clean and efficient service.`}
+                    `Certified ${serviceLabels[provider.serviceType] || provider.serviceType} professional with over ${provider.experience || 0} years of field experience. Dedicated to prompt, high-quality, and reliable service.`}
                 </p>
               </div>
             </div>
 
-            {/* Portfolio Gallery */}
-            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-              <h3 className="text-lg font-semibold mb-4">Work Portfolio</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="bg-gray-100 rounded-lg h-32 w-full flex items-center justify-center text-gray-400">
-                  Example 1
-                </div>
-                <div className="bg-gray-100 rounded-lg h-32 w-full flex items-center justify-center text-gray-400">
-                  Example 2
-                </div>
-                <div className="bg-gray-100 rounded-lg flex items-center justify-center h-32 text-gray-400 text-sm font-medium">
-                  +2 more
+            {/* Work Portfolio Gallery - Only displayed if real portfolio images exist */}
+            {portfolioImages.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Work Portfolio</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {portfolioImages.map((img, idx) => (
+                    <div key={idx} className="rounded-lg overflow-hidden border border-gray-200 h-32">
+                      <img src={img} alt={`Work sample ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Reviews */}
-            <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-              <h3 className="text-lg font-semibold mb-6">Customer Reviews</h3>
+            {/* Customer Reviews Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+              <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-100">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Customer Ratings & Reviews</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Verified service experiences from HomeFix users</p>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                    <span className="text-2xl font-black text-gray-900">
+                      {provider.rating ? provider.rating.toFixed(1) : "N/A"}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">{provider.totalReviews || 0} Total Reviews</span>
+                </div>
+              </div>
+
+              {/* Review List */}
               <div className="space-y-6">
                 {formattedReviews.length > 0 ? (
                   formattedReviews.map((review, i) => (
@@ -381,75 +412,84 @@ const ProviderDetailPage = () => {
                       key={i}
                       className="border-b border-gray-100 pb-6 last:border-0 last:pb-0"
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xs">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center border border-blue-100 shrink-0">
                             {review.initials}
                           </div>
-                          <span className="font-medium text-gray-900">
-                            {review.name}
-                          </span>
+                          <div>
+                            <span className="font-semibold text-gray-900 text-sm block leading-tight">
+                              {review.name}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {review.date}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-xs text-gray-500">
-                          {review.date}
-                        </span>
+                        <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded text-amber-800 text-xs font-semibold">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>{review.rating.toFixed(1)}</span>
+                        </div>
                       </div>
-                      <div className="flex text-yellow-400 text-sm mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating
-                                ? "fill-current"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-gray-600 text-sm">{review.text}</p>
+                      <p className="text-gray-600 text-sm leading-relaxed mt-2 pl-12">
+                        {review.text}
+                      </p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500 italic">No reviews yet.</p>
+                  <div className="text-center py-10 px-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-xs text-gray-400">
+                      <Star className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">No reviews yet</h3>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                      Be the first customer to book this provider and share your experience with the community.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Right Column: Booking Card */}
-          <aside className="lg:w-full">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-24 border border-blue-50">
-              <div className="text-center mb-6">
-                <span className="block text-gray-500 text-sm mb-1">
-                  Standard Rate
-                </span>
-                <div className="flex items-center justify-center gap-1">
-                  <span className="text-3xl font-bold text-gray-900">
-                    ₹{provider.pricePerHour}
+          {/* Right Column: Sticky Compact Booking Card */}
+          <aside className="lg:w-full lg:sticky lg:top-24">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200/80 p-6">
+              <div className="flex items-baseline justify-between mb-4 pb-4 border-b border-gray-100">
+                <div>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 block">
+                    Service Rate
                   </span>
-                  <span className="text-gray-500 font-medium">/ hour</span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="text-3xl font-extrabold text-gray-900">
+                      ₹{provider.pricePerHour}
+                    </span>
+                    <span className="text-gray-500 text-sm font-medium">/ hr</span>
+                  </div>
                 </div>
+                {provider.isVerified && (
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
+                      <ShieldCheck className="w-3.5 h-3.5" /> ID Verified
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                  <ShieldCheck className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm text-gray-700">
-                    Background Checked & Verified
-                  </span>
+              <div className="space-y-2.5 mb-5 text-xs text-gray-600 bg-blue-50/50 p-3 rounded-lg border border-blue-100/60">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>Identity & Profile Background Checked</span>
                 </div>
-                <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                  <Zap className="w-5 h-5 text-primary mt-0.5" />
-                  <span className="text-sm text-gray-700">
-                    Instant Booking Confirmation
-                  </span>
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>Direct Scheduling & Prompt Confirmation</span>
                 </div>
               </div>
 
               {/* Booking Form */}
               <form onSubmit={handleBooking} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                     Select Date
                   </label>
                   <DateSelector
@@ -458,8 +498,8 @@ const ProviderDetailPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Time
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                    Select Time Slot
                   </label>
                   <TimeSelector
                     selectedTime={bookingTime}
@@ -470,30 +510,30 @@ const ProviderDetailPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
                     Estimated Duration
                   </label>
                   <select
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white font-medium text-gray-800"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
                       <option key={h} value={h}>
-                        {h} hour{h > 1 ? "s" : ""}
+                        {h} hour{h > 1 ? "s" : ""} (₹{provider.pricePerHour * h})
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address Details
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                    Service Location
                   </label>
                   <div className="space-y-2">
                     <input
                       type="text"
                       required
-                      placeholder="Street / Building / Flat No"
+                      placeholder="Street / Flat / Door No"
                       value={address.street}
                       onChange={(e) =>
                         setAddress({ ...address, street: e.target.value })
@@ -535,7 +575,7 @@ const ProviderDetailPage = () => {
                       />
                       <input
                         type="text"
-                        placeholder="Landmark (Optional)"
+                        placeholder="Landmark (Opt)"
                         value={address.landmark}
                         onChange={(e) =>
                           setAddress({ ...address, landmark: e.target.value })
@@ -549,50 +589,33 @@ const ProviderDetailPage = () => {
                       type="button"
                       onClick={getMyLocation}
                       disabled={locationLoading}
-                      className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed rounded-lg text-sm font-medium transition-all ${
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 border-2 border-dashed rounded-lg text-xs font-semibold transition-all ${
                         address.coordinates?.lat
-                          ? "border-green-300 bg-green-50 text-green-700"
+                          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
                           : "border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
                       } ${locationLoading ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       {locationLoading ? (
-                        <MapPin className="w-4 h-4 animate-bounce" />
+                        <MapPin className="w-3.5 h-3.5 animate-bounce" />
                       ) : (
-                        <Navigation className="w-4 h-4" />
+                        <Navigation className="w-3.5 h-3.5" />
                       )}
                       {locationLoading
                         ? "Getting location..."
                         : address.coordinates?.lat
-                          ? "📍 Location captured!"
-                          : "📍 Use My Location"}
+                          ? "📍 Location Captured"
+                          : "📍 Use Current GPS Location"}
                     </button>
-
-                    {/* Location Confirmation */}
-                    {address.coordinates?.lat && (
-                      <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-100">
-                        <span className="text-xs text-green-700">
-                          📍 {address.coordinates.lat.toFixed(5)},{" "}
-                          {address.coordinates.lng.toFixed(5)}
-                        </span>
-                        <a
-                          href={`https://www.google.com/maps?q=${address.coordinates.lat},${address.coordinates.lng}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline font-medium"
-                        >
-                          View on Map ↗
-                        </a>
-                      </div>
-                    )}
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Problem Description
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                    Problem Notes (Optional)
                   </label>
                   <textarea
-                    rows={3}
-                    placeholder="Describe your issue..."
+                    rows={2}
+                    placeholder="Briefly describe the task or issue..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none resize-none"
@@ -602,18 +625,16 @@ const ProviderDetailPage = () => {
                 <button
                   type="submit"
                   disabled={isBooking}
-                  className={`block w-full bg-primary text-white text-center font-bold py-3 rounded-lg transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ${
-                    isBooking
-                      ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-blue-600"
+                  className={`block w-full bg-primary hover:bg-blue-700 text-white text-center font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg active:scale-98 ${
+                    isBooking ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
-                  {isBooking ? "Booking..." : "Book Now"}
+                  {isBooking ? "Submitting Booking..." : `Confirm Booking (₹${provider.pricePerHour * duration})`}
                 </button>
               </form>
 
-              <p className="text-xs text-center text-gray-500 mt-4">
-                You won't be charged until the service is completed.
+              <p className="text-[11px] text-center text-gray-500 mt-3 leading-tight">
+                No upfront payment required. You pay after service completion.
               </p>
             </div>
           </aside>

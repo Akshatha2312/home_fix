@@ -143,95 +143,152 @@ const AdminProviders = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Provider
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Service
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Stats
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
-                Status
-              </th>
-              <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredProviders.map((provider) => (
-              <tr key={provider._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+        {/* Desktop Table View */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-left min-w-[700px]">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Provider
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Service
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Stats
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredProviders.map((provider) => (
+                <tr key={provider._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold shrink-0">
+                      {provider.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-gray-900 truncate">
+                        {provider.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 truncate">{provider.email}</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium capitalize">
+                      {provider.serviceType}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {provider.experience} yrs exp
+                    </p>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-1 text-yellow-500">
+                      <Star className="w-3.5 h-3.5 fill-current" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {provider.rating ? provider.rating.toFixed(1) : "N/A"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      {provider.totalBookings || 0} bookings
+                    </p>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      {provider.availability ? (
+                        <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                          Online
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-200">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                          Offline
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => handleViewStats(provider)}
+                        className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                      >
+                        Health Card
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(provider)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Account"
+                        aria-label={`Delete ${provider.name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Compact Card View */}
+        <div className="block sm:hidden divide-y divide-gray-100">
+          {filteredProviders.map((provider) => (
+            <div key={provider._id} className="p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold shrink-0">
                     {provider.name.charAt(0)}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-sm truncate">
                       {provider.name}
                     </h3>
-                    <p className="text-xs text-gray-500">{provider.email}</p>
+                    <p className="text-xs text-gray-400 capitalize">{provider.serviceType} Specialist</p>
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium capitalize">
-                    {provider.serviceType}
+                </div>
+                {provider.availability ? (
+                  <span className="flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 shrink-0">
+                    Online
                   </span>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {provider.experience} years exp
-                  </p>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1 text-yellow-500">
-                    <Star className="w-3 h-3 fill-current" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {provider.rating}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {provider.totalBookings} bookings
-                  </p>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    {provider.availability ? (
-                      <span className="flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        Online
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-full border border-gray-200">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                        Offline
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={() => handleViewStats(provider)}
-                      className="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-                    >
-                      View Health Card
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(provider)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete Account"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                ) : (
+                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                    Offline
+                  </span>
+                )}
+              </div>
+
+              <div className="bg-gray-50 p-2.5 rounded-lg text-xs space-y-1 text-gray-600">
+                <p className="truncate"><span className="font-semibold text-gray-700">Email:</span> {provider.email}</p>
+                <p><span className="font-semibold text-gray-700">Experience:</span> {provider.experience} years</p>
+                <p><span className="font-semibold text-gray-700">Rating:</span> ⭐ {provider.rating ? provider.rating.toFixed(1) : "New"}</p>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => handleViewStats(provider)}
+                  className="flex-1 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 rounded-lg text-center"
+                >
+                  View Health Card
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(provider)}
+                  className="px-3 py-2 text-xs font-semibold text-red-600 bg-red-50 rounded-lg"
+                  aria-label={`Delete ${provider.name}`}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {filteredProviders.length === 0 && (
           <div className="p-8 text-center text-gray-500">
             No providers found matching "{searchTerm}"

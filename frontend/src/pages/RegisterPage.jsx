@@ -180,7 +180,8 @@ const RegisterPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -189,6 +190,33 @@ const RegisterPage = () => {
                   )}
                 </button>
               </div>
+
+              {/* Password Strength Indicator */}
+              {form.password.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  <div className="flex gap-1 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        form.password.length < 6
+                          ? "w-1/3 bg-red-500"
+                          : form.password.length < 10 || !/[0-9!@#$%^&*]/.test(form.password)
+                            ? "w-2/3 bg-amber-500"
+                            : "w-full bg-emerald-500"
+                      }`}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px] text-gray-500">
+                    <span>Password Strength:</span>
+                    <span className="font-semibold capitalize">
+                      {form.password.length < 6
+                        ? "Too Weak (min 6 chars)"
+                        : form.password.length < 10 || !/[0-9!@#$%^&*]/.test(form.password)
+                          ? "Medium Strength"
+                          : "Strong Password"}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Provider-specific Fields */}

@@ -204,8 +204,8 @@ const AdminDashboard = () => {
             </h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+          <div className="overflow-x-auto -mx-2 px-2">
+            <table className="w-full text-left min-w-[480px]">
               <thead>
                 <tr className="border-b border-gray-100 text-gray-500 text-sm">
                   <th className="pb-3 font-medium pl-2">Customer</th>
@@ -221,15 +221,15 @@ const AdminDashboard = () => {
                       key={booking._id}
                       className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors"
                     >
-                      <td className="py-3 pl-2 font-medium text-gray-800">
+                      <td className="py-3 pl-2 font-medium text-gray-800 whitespace-nowrap">
                         {booking.customerId?.name || "Unknown"}
                       </td>
-                      <td className="py-3 text-gray-600">
+                      <td className="py-3 text-gray-600 capitalize whitespace-nowrap">
                         {booking.serviceType}
                       </td>
-                      <td className="py-3">
+                      <td className="py-3 whitespace-nowrap">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium capitalize
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize
                           ${
                             booking.status === "completed"
                               ? "bg-green-100 text-green-700"
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                           {booking.status}
                         </span>
                       </td>
-                      <td className="py-3 text-right pr-2 font-medium text-gray-800">
+                      <td className="py-3 text-right pr-2 font-bold text-gray-900 whitespace-nowrap">
                         ₹{booking.estimatedCost}
                       </td>
                     </tr>

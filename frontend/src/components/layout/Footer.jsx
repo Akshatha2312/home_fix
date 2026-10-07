@@ -40,7 +40,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
                 <Link
-                  to="/services"
+                  to="/services?type=plumber"
                   className="hover:text-primary transition-colors"
                 >
                   Plumbing
@@ -48,7 +48,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/services"
+                  to="/services?type=electrician"
                   className="hover:text-primary transition-colors"
                 >
                   Electrical
@@ -56,7 +56,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/services"
+                  to="/services?type=cleaner"
                   className="hover:text-primary transition-colors"
                 >
                   Cleaning

@@ -201,6 +201,13 @@ const Navbar = () => {
                     >
                       Provider Login
                     </Link>
+                    <Link
+                      to="/login?type=admin"
+                      onClick={() => setShowLoginDropdown(false)}
+                      className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-primary transition-colors"
+                    >
+                      Admin Login
+                    </Link>
                   </div>
                 )}
               </>
@@ -298,6 +305,13 @@ const Navbar = () => {
                   className="block text-gray-700 hover:bg-blue-50 hover:text-primary p-3 rounded-lg transition-colors font-medium"
                 >
                   Provider Login
+                </Link>
+                <Link
+                  to="/login?type=admin"
+                  onClick={() => setIsOpen(false)}
+                  className="block text-gray-700 hover:bg-blue-50 hover:text-primary p-3 rounded-lg transition-colors font-medium"
+                >
+                  Admin Login
                 </Link>
               </>
             ) : (

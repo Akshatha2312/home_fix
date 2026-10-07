@@ -19,6 +19,8 @@ import { servicesAPI, bookingsAPI } from "../services/api";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../context/socket";
+import FAQSection from "../components/common/FAQSection";
+import PromotionalBanner from "../components/common/PromotionalBanner";
 
 // Map service IDs to Lucide icons to match the HTML's visual style better than emojis
 const SERVICE_ICONS = {
@@ -619,6 +621,12 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Promotional Banner */}
+      <PromotionalBanner />
+
+      {/* Frequently Asked Questions */}
+      <FAQSection />
     </div>
   );
 };
