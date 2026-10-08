@@ -14,7 +14,7 @@ import {
   Award,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { servicesAPI, bookingsAPI } from "../services/api";
+import { servicesAPI, bookingsAPI, couponsAPI } from "../services/api";
 import toast from "react-hot-toast";
 import DateSelector from "../components/common/DateSelector";
 import TimeSelector from "../components/common/TimeSelector";
@@ -43,6 +43,11 @@ const ProviderDetailPage = () => {
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   // Pre-fill address from user profile if available
   useEffect(() => {
@@ -163,6 +168,34 @@ const ProviderDetailPage = () => {
     fetchProvider();
   }, [id]);
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a promo code.");
+      return;
+    }
+
+    try {
+      setValidatingCoupon(true);
+      const bookingAmount = (provider?.pricePerHour || 0) * duration;
+      const res = await couponsAPI.validate({
+        code: couponCode,
+        bookingAmount,
+        serviceType: provider?.serviceType,
+      });
+
+      if (res.success) {
+        setAppliedCoupon(res.coupon);
+        toast.success(`Coupon ${res.coupon.code} applied! ₹${res.coupon.discountAmount} saved.`);
+      }
+    } catch (err) {
+      console.error("Coupon validation failed:", err);
+      setAppliedCoupon(null);
+      toast.error(err.message || "Invalid coupon code");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -181,6 +214,7 @@ const ProviderDetailPage = () => {
         address,
         problemDescription: description,
         estimatedDuration: duration,
+        couponCode: appliedCoupon ? appliedCoupon.code : couponCode,
       };
 
       const response = await bookingsAPI.createBooking(bookingData);
@@ -201,6 +235,8 @@ const ProviderDetailPage = () => {
         });
         setDescription("");
         setDuration(1);
+        setAppliedCoupon(null);
+        setCouponCode("");
         navigate("/customer-dashboard");
       }
     } catch (error) {
@@ -680,12 +716,61 @@ const ProviderDetailPage = () => {
                   />
                 </div>
 
+                {/* Promo Code Input */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0F2747] mb-1">
+                    Have a Promo Code / Coupon?
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. HOMEFIX50"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold uppercase focus:ring-2 focus:ring-[#0F766E] outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon || !couponCode.trim()}
+                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                    >
+                      {validatingCoupon ? "Checking..." : "Apply"}
+                    </button>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="mt-1.5 flex items-center justify-between text-xs text-[#16A34A] font-bold bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                      <span>✓ Code {appliedCoupon.code} Applied (-₹{appliedCoupon.discountAmount})</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppliedCoupon(null);
+                          setCouponCode("");
+                        }}
+                        className="text-slate-400 hover:text-slate-600 text-[11px] underline ml-2"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {/* 4. BOOKING SUMMARY & CTA */}
-                <div className="pt-3 border-t border-slate-100 space-y-2 text-xs font-semibold text-slate-600">
+                <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs font-semibold text-slate-600">
                   <div className="flex justify-between">
-                    <span>Estimated Total:</span>
-                    <span className="font-extrabold text-[#0F2747] text-sm">
-                      ₹{provider.pricePerHour * duration}
+                    <span>Base Amount:</span>
+                    <span>₹{provider.pricePerHour * duration}</span>
+                  </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-[#16A34A] font-bold">
+                      <span>Discount ({appliedCoupon.code}):</span>
+                      <span>-₹{appliedCoupon.discountAmount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-1 border-t border-slate-100 text-sm font-black text-[#0F2747]">
+                    <span>Payable Total:</span>
+                    <span>
+                      ₹{appliedCoupon ? appliedCoupon.finalAmount : provider.pricePerHour * duration}
                     </span>
                   </div>
                 </div>
@@ -697,7 +782,11 @@ const ProviderDetailPage = () => {
                     isBooking ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                 >
-                  <span>{isBooking ? "Submitting Request..." : `Confirm Booking (₹${provider.pricePerHour * duration})`}</span>
+                  <span>
+                    {isBooking
+                      ? "Submitting Request..."
+                      : `Confirm Booking (₹${appliedCoupon ? appliedCoupon.finalAmount : provider.pricePerHour * duration})`}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>

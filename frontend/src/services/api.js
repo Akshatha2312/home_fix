@@ -66,8 +66,17 @@ export const bookingsAPI = {
   updateStatus: (id, status) => api.put(`/bookings/${id}/status`, { status }),
   cancel: (id, reason) => api.put(`/bookings/${id}/cancel`, { reason }),
   submitReview: (id, data) => api.post(`/bookings/${id}/review`, data),
+  replyToReview: (id, text) => api.post(`/bookings/${id}/reply-review`, { text }),
   getAvailability: (providerId, date) =>
     api.get(`/bookings/availability/${providerId}`, { params: { date } }),
+};
+
+export const couponsAPI = {
+  getAll: () => api.get("/coupons"),
+  validate: (data) => api.post("/coupons/validate", data),
+  create: (data) => api.post("/coupons", data),
+  toggleStatus: (id) => api.put(`/coupons/${id}/status`),
+  delete: (id) => api.delete(`/coupons/${id}`),
 };
 
 export const favoritesAPI = {

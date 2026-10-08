@@ -8,6 +8,7 @@ import {
   LogOut,
   ShieldCheck,
   CalendarDays,
+  Tag,
 } from "lucide-react";
 
 const AdminLayout = () => {
@@ -26,6 +27,7 @@ const AdminLayout = () => {
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/customers", label: "Customers", icon: Users },
     { path: "/admin/providers", label: "Providers", icon: Briefcase },
+    { path: "/admin/coupons", label: "Coupons", icon: Tag },
   ];
 
   return (

@@ -25,6 +25,7 @@ import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminProviders from "./pages/admin/AdminProviders";
+import AdminCoupons from "./pages/admin/AdminCoupons";
 import ProfileSettings from "./pages/ProfileSettings";
 
 function AppContent() {
@@ -75,6 +76,7 @@ function AppContent() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="providers" element={<AdminProviders />} />
+              <Route path="coupons" element={<AdminCoupons />} />
             </Route>
           </Route>
         </Routes>

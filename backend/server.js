@@ -23,6 +23,7 @@ import paymentRoutes from "./routes/payment.routes.js";
 import providerRoutes from "./routes/provider.routes.js";
 import favoriteRoutes from "./routes/favorite.routes.js";
 import adminRoutes from "./routes/admin.route.js";
+import couponRoutes from "./routes/coupon.routes.js";
 
 // Load env vars
 dotenv.config();
@@ -135,6 +136,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/providers", providerRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/coupons", couponRoutes);
 
 // Health check
 app.get("/api/health", async (req, res) => {

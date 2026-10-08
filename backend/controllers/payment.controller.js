@@ -42,11 +42,14 @@ export const createOrder = async (req, res) => {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
+    // Use finalAmount (post-discount) if present, otherwise estimatedCost
+    const payableAmount = booking.finalAmount > 0 ? booking.finalAmount : booking.estimatedCost;
+
     // Ensure amount is at least ₹1 (100 paise)
-    let amountInPaise = Math.round(booking.estimatedCost * 100);
+    let amountInPaise = Math.round(payableAmount * 100);
     if (amountInPaise < 100) {
       console.warn(
-        `[Payment] Booking ${bookingId} cost is ${booking.estimatedCost}, adjusting to ₹1 for test.`,
+        `[Payment] Booking ${bookingId} cost is ${payableAmount}, adjusting to ₹1 for test.`,
       );
       amountInPaise = 100;
     }

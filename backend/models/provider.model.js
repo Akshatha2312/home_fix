@@ -101,6 +101,15 @@ const providerSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    workingHours: {
+      monday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      tuesday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      wednesday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      thursday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      friday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      saturday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: false } },
+      sunday: { start: { type: String, default: "09:00" }, end: { type: String, default: "18:00" }, isOff: { type: Boolean, default: true } },
+    },
     location: {
       area: { type: String, default: "" },
       city: { type: String, default: "Bangalore" },

@@ -99,6 +99,25 @@ const BookingCard = ({
         </div>
       )}
 
+      {booking.rating && (
+        <div className="mt-3 p-3 bg-amber-50/70 rounded-xl text-xs border border-amber-200/80">
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-extrabold text-[#0F2747]">Customer Review</span>
+            <RatingStars rating={booking.rating} size="xs" />
+          </div>
+          {booking.review && <p className="text-slate-700 italic">"{booking.review}"</p>}
+
+          {booking.providerReply?.text && (
+            <div className="mt-2 pl-3 border-l-2 border-[#0F766E] text-slate-700 font-medium bg-white p-2 rounded-r-lg">
+              <span className="font-bold text-[#0F766E] block text-[11px] uppercase tracking-wider">
+                Provider Response:
+              </span>
+              <span>{booking.providerReply.text}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {booking.status === "cancelled" && booking.cancellationReason && (
         <div className="mt-3 p-3 bg-red-50 rounded-xl text-xs text-[#DC2626] border border-red-100 font-medium">
           <span className="font-bold">Cancellation Reason:</span>{" "}
@@ -111,13 +130,29 @@ const BookingCard = ({
           <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
             Total Cost
           </span>
-          <span className="font-black text-[#0F2747] text-lg">
-            ₹{booking.estimatedCost || 0}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-black text-[#0F2747] text-lg">
+              ₹{booking.finalAmount > 0 ? booking.finalAmount : (booking.estimatedCost || 0)}
+            </span>
+            {booking.discountAmount > 0 && (
+              <span className="text-[11px] font-bold text-[#16A34A] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                -₹{booking.discountAmount} OFF ({booking.couponCode})
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {(booking.paymentStatus === "paid" || booking.status === "completed") && (
+            <button
+              onClick={() => onAction?.("invoice", booking)}
+              className="px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-[#0F2747] rounded-xl transition-all border border-slate-200 cursor-pointer flex items-center gap-1"
+            >
+              📄 Invoice / Receipt
+            </button>
+          )}
+
           {userType === "provider" && booking.status === "pending" && (
             <>
               <button
@@ -169,6 +204,18 @@ const BookingCard = ({
                 disabled={isProcessing}
               >
                 Rate & Review
+              </button>
+            )}
+
+          {userType === "provider" &&
+            booking.rating &&
+            !booking.providerReply?.text && (
+              <button
+                onClick={() => onAction?.("replyReview", booking)}
+                className="px-3.5 py-2 text-xs font-bold bg-[#0F766E] text-white hover:bg-[#0B5F59] rounded-xl transition-all shadow-2xs cursor-pointer"
+                disabled={isProcessing}
+              >
+                Reply to Review
               </button>
             )}
 

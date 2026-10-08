@@ -1,5 +1,6 @@
 import Booking from "../models/booking.model.js";
 import Provider from "../models/provider.model.js";
+import Coupon from "../models/coupon.model.js";
 import {
   notifyNewBooking,
   notifyBookingUpdated,
@@ -20,6 +21,7 @@ export const createBooking = async (req, res) => {
       address,
       problemDescription,
       estimatedDuration,
+      couponCode,
     } = req.body;
 
     // Server-side validation for booking date
@@ -57,7 +59,76 @@ export const createBooking = async (req, res) => {
       });
     }
 
+    // Validate provider working hours for day of week & time window
+    const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const dayName = daysOfWeek[selectedDate.getDay()];
+    if (provider.workingHours && provider.workingHours[dayName]) {
+      const schedule = provider.workingHours[dayName];
+      if (schedule.isOff) {
+        return res.status(400).json({
+          success: false,
+          message: `Provider is off on ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}s.`,
+        });
+      }
+
+      if (schedule.start && schedule.end && bookingTime) {
+        const [reqStartH, reqStartM] = bookingTime.split(":").map(Number);
+        const reqStartMins = reqStartH * 60 + reqStartM;
+        const reqEndMins = reqStartMins + (estimatedDuration || 1) * 60;
+
+        const [workStartH, workStartM] = schedule.start.split(":").map(Number);
+        const workStartMins = workStartH * 60 + workStartM;
+
+        const [workEndH, workEndM] = schedule.end.split(":").map(Number);
+        const workEndMins = workEndH * 60 + workEndM;
+
+        if (reqStartMins < workStartMins || reqEndMins > workEndMins) {
+          return res.status(400).json({
+            success: false,
+            message: `Booking time (${bookingTime}) is outside provider working hours (${schedule.start} - ${schedule.end}).`,
+          });
+        }
+      }
+    }
+
     const estimatedCost = provider.pricePerHour * (estimatedDuration || 1);
+
+    // Backend Coupon Validation
+    let discountAmount = 0;
+    let validCouponCode = "";
+    if (couponCode && couponCode.trim()) {
+      const coupon = await Coupon.findOne({
+        code: couponCode.trim().toUpperCase(),
+        isActive: true,
+        expiryDate: { $gt: new Date() },
+      });
+
+      if (
+        coupon &&
+        coupon.usedCount < coupon.usageLimit &&
+        estimatedCost >= coupon.minBookingAmount
+      ) {
+        if (
+          coupon.applicableService === "all" ||
+          coupon.applicableService.toLowerCase() === (serviceType || provider.serviceType).toLowerCase()
+        ) {
+          if (coupon.discountType === "fixed") {
+            discountAmount = coupon.discountValue;
+          } else if (coupon.discountType === "percentage") {
+            discountAmount = (estimatedCost * coupon.discountValue) / 100;
+            if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+              discountAmount = coupon.maxDiscount;
+            }
+          }
+          discountAmount = Math.min(discountAmount, estimatedCost);
+          validCouponCode = coupon.code;
+          coupon.usedCount += 1;
+          await coupon.save();
+        }
+      }
+    }
+
+    const finalAmount = Math.max(0, estimatedCost - discountAmount);
 
     // Check for overlapping bookings
     // Calculate new booking time range
@@ -97,6 +168,9 @@ export const createBooking = async (req, res) => {
       problemDescription,
       estimatedDuration: estimatedDuration || 1,
       estimatedCost,
+      couponCode: validCouponCode,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      finalAmount: Math.round(finalAmount * 100) / 100,
     });
 
     // Increment provider's total bookings count
@@ -575,24 +649,72 @@ export const getProviderAvailability = async (req, res) => {
       });
     }
 
+    const provider = await Provider.findById(providerId).select("workingHours availability");
+    const targetDate = new Date(date);
+
+    let isDayOff = false;
+    if (provider && provider.workingHours) {
+      const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+      const dayName = daysOfWeek[targetDate.getDay()];
+      if (provider.workingHours[dayName]?.isOff) {
+        isDayOff = true;
+      }
+    }
+
     // Find all bookings for this provider on the given date
-    // Status should be pending or accepted
     const bookings = await Booking.find({
       providerId,
-      bookingDate: new Date(date),
+      bookingDate: targetDate,
       status: { $in: ["pending", "accepted"] },
     }).select("bookingTime estimatedDuration");
 
-    // simplified: just return the booked times
-    // In a more complex system, we might calculate available slots based on duration
     const bookedSlots = bookings.map((b) => ({
       time: b.bookingTime,
       duration: b.estimatedDuration,
     }));
 
-    res.status(200).json({ success: true, bookedSlots });
+    res.status(200).json({ success: true, bookedSlots, isDayOff });
   } catch (error) {
     console.error("Error fetching availability:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Provider reply to customer review
+// @route   POST /api/bookings/:id/reply-review
+export const replyToReview = async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ success: false, message: "Reply text is required" });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    if (booking.providerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: "Not authorized to reply to another provider's review" });
+    }
+
+    if (!booking.rating && !booking.review) {
+      return res.status(400).json({ success: false, message: "No customer review exists for this booking" });
+    }
+
+    if (booking.providerReply && booking.providerReply.text) {
+      return res.status(400).json({ success: false, message: "Provider reply already exists for this review" });
+    }
+
+    booking.providerReply = {
+      text: text.trim(),
+      createdAt: new Date(),
+    };
+    await booking.save();
+
+    res.status(200).json({ success: true, booking });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

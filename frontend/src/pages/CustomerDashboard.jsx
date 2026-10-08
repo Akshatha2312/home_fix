@@ -24,6 +24,7 @@ import { useAuth } from "../hooks/useAuth";
 import BookingCard from "../components/common/BookingCard";
 import Modal from "../components/common/Modal";
 import ReviewModal from "../components/common/ReviewModal";
+import InvoiceModal from "../components/common/InvoiceModal";
 import toast from "react-hot-toast";
 import { bookingsAPI, paymentsAPI } from "../services/api";
 import { useSocket } from "../context/socket";
@@ -54,6 +55,9 @@ const CustomerDashboard = () => {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedBookingForReview, setSelectedBookingForReview] =
+    useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedBookingForInvoice, setSelectedBookingForInvoice] =
     useState(null);
 
   useEffect(() => {
@@ -182,18 +186,22 @@ const CustomerDashboard = () => {
     fetchBookings();
   };
 
-  const handleAction = async (action, bookingId) => {
+  const handleAction = async (action, data) => {
     if (action === "pay") {
-      handlePayment(bookingId);
+      handlePayment(data);
     }
     if (action === "cancelled") {
-      setSelectedBookingId(bookingId);
+      setSelectedBookingId(data);
       setIsCancelModalOpen(true);
       setCancellationReason("");
     }
     if (action === "review") {
-      setSelectedBookingForReview(bookingId);
+      setSelectedBookingForReview(data);
       setShowReviewModal(true);
+    }
+    if (action === "invoice") {
+      setSelectedBookingForInvoice(data);
+      setShowInvoiceModal(true);
     }
   };
 
@@ -665,6 +673,17 @@ const CustomerDashboard = () => {
             setSelectedBookingForReview(null);
           }}
           onSuccess={handleReviewSuccess}
+        />
+      )}
+
+      {/* INVOICE MODAL */}
+      {showInvoiceModal && selectedBookingForInvoice && (
+        <InvoiceModal
+          booking={selectedBookingForInvoice}
+          onClose={() => {
+            setShowInvoiceModal(false);
+            setSelectedBookingForInvoice(null);
+          }}
         />
       )}
     </div>
